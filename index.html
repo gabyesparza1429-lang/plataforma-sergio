@@ -3,33 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plateforme d'Études - Sergio</title>
+    <title>Sergio's World - Apprentissage</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Bonjour, Sergio! 👋</h1>
-            <div id="stats-bar">
-                <span>Matière: <strong id="subject-name">Maths</strong></span>
-                <span>Temps: <strong id="timer">00:00</strong></span>
-            </div>
-        </header>
 
-        <section id="game-container">
-            <div id="question-card">
-                <h2 id="question-text">Chargement...</h2>
-                <div id="options-grid"></div>
-            </div>
-        </section>
+    <div id="admin-access" onclick="openAdmin()">⚙️</div>
 
-        <section id="report-section">
-            <h3>Rapport de Progrès</h3>
-            <div id="report-display">
-                </div>
-            <button id="exam-btn" class="hidden" onclick="startExam()">Commencer l'Examen Final 🎓</button>
-        </section>
+    <main id="home-screen">
+        <h1 class="main-title">Salut, Sergio !</h1>
+        <div class="grid-subjects" id="subjects-grid">
+            </div>
+    </main>
+
+    <section id="subject-view" class="hidden">
+        <button class="back-btn" onclick="showHome()">⬅ Retour</button>
+        <h2 id="current-subject-title">Matière</h2>
+        <div id="folders-container" class="folder-grid"></div>
+    </section>
+
+    <section id="admin-panel" class="hidden">
+        <button class="back-btn" onclick="showHome()">Cerrar</button>
+        <h2>Panel de Control (Gaby)</h2>
+        <div class="admin-controls">
+            <select id="materia-select">
+                <option value="histoire">Histoire</option>
+                <option value="francais">Français</option>
+                <option value="espagnol">Espagnol</option>
+                <option value="anglais">Anglais</option>
+                <option value="allemand">Allemand</option>
+                <option value="physique">Physique</option>
+            </select>
+            <input type="text" id="folder-name" placeholder="Nombre del Tema (Carpeta)">
+            <textarea id="iframe-code" placeholder="Pega aquí el código <iframe>"></textarea>
+            <button class="save-btn" onclick="saveContent()">Subir Actividad</button>
+        </div>
+    </section>
+
+    <div id="finish-modal" class="hidden">
+        <div class="modal-content">
+            <h3>Félicitations ! 🎉</h3>
+            <p>Quelle note as-tu obtenue ?</p>
+            <input type="number" id="final-note" min="0" max="20" placeholder="Ej: 18">
+            <button onclick="submitScore()">Enregistrer</button>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
