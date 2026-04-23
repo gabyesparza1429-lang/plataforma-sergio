@@ -1,16 +1,20 @@
 const materias = ['histoire', 'francais', 'espagnol', 'anglais', 'allemand', 'physique'];
 let currentSub = '';
 
-// Base de datos local
+// Cargar Datos
 let db = JSON.parse(localStorage.getItem('sergioData')) || {
     histoire: [], francais: [], espagnol: [], anglais: [], allemand: [], physique: []
 };
 let reminders = JSON.parse(localStorage.getItem('sergioReminders')) || [];
 
-// NAVEGACIÓN
+// NAVEGACIÓN (SISTEMA DE VISTAS ACTIVA)
 function showView(viewId) {
-    document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-    document.getElementById(viewId).classList.remove('hidden');
+    // 1. Ocultar todas las vistas y quitar la clase 'active'
+    document.querySelectorAll('.view').forEach(v => {
+        v.classList.remove('active');
+    });
+    // 2. Mostrar solo la vista deseada
+    document.getElementById(viewId).classList.add('active');
 }
 
 function goToHome() {
@@ -22,10 +26,12 @@ function goToSubject() {
     showView('view-subject');
 }
 
-// INICIO (ROBLOX CARDS)
+// RENDERIZAR INICIO
 function renderHome() {
     const grid = document.getElementById('subjects-grid');
+    if (!grid) return;
     grid.innerHTML = '';
+
     materias.forEach(m => {
         const card = document.createElement('div');
         card.className = `subject-card card-${m}`;
@@ -34,19 +40,22 @@ function renderHome() {
         grid.appendChild(card);
     });
 
-    // Cargar Pendientes
+    renderReminders();
+}
+
+function renderReminders() {
     const list = document.getElementById('reminders-list');
     list.innerHTML = '';
     const today = new Date().toISOString().split('T')[0];
-    const activeReminders = reminders.filter(r => r.date >= today);
+    const active = reminders.filter(r => r.date >= today);
 
-    if (activeReminders.length === 0) {
-        list.innerHTML = "<p>Tout est à jour ! 👍</p>";
+    if (active.length === 0) {
+        list.innerHTML = "<p style='color: gray;'>Pas de rappels pour aujourd'hui. 👍</p>";
     } else {
-        activeReminders.forEach(r => {
+        active.forEach(r => {
             const item = document.createElement('div');
             item.className = 'reminder-item';
-            item.innerHTML = `🗓 ${r.date}: ${r.text}`;
+            item.innerHTML = `<strong>${r.date}:</strong> ${r.text}`;
             list.appendChild(item);
         });
     }
@@ -57,11 +66,12 @@ function openSubject(m) {
     currentSub = m;
     showView('view-subject');
     document.getElementById('current-subject-title').innerText = m.toUpperCase();
+    
     const container = document.getElementById('folders-container');
     container.innerHTML = '';
 
     if (!db[m] || db[m].length === 0) {
-        container.innerHTML = "<p>Aucune activité pour l'instant.</p>";
+        container.innerHTML = "<p>Aucune activité. Gaby doit en ajouter !</p>";
         return;
     }
 
@@ -77,10 +87,8 @@ function openSubject(m) {
     });
 }
 
-// ADMIN LOGIN Y GUARDADO
-function showLogin() {
-    showView('view-login');
-}
+// ADMIN FUNCTIONS
+function showLogin() { showView('view-login'); }
 
 function checkAdminPassword() {
     const pass = document.getElementById('admin-pass-input').value;
@@ -88,7 +96,7 @@ function checkAdminPassword() {
         showView('view-admin');
         document.getElementById('admin-pass-input').value = '';
     } else {
-        alert("Mot de passe incorrect");
+        alert("Mot de passe incorrect.");
     }
 }
 
@@ -96,8 +104,9 @@ function saveData() {
     const mat = document.getElementById('adm-materia').value;
     const tema = document.getElementById('adm-tema').value;
     const code = document.getElementById('adm-code').value;
-    if (!tema || !code) return alert("Remplis tout !");
 
+    if (!tema || !code) return alert("Remplis tout !");
+    
     db[mat].push({ tema, code });
     localStorage.setItem('sergioData', JSON.stringify(db));
     alert("Sauvegardé !");
@@ -107,7 +116,7 @@ function saveData() {
 function saveReminder() {
     const text = document.getElementById('rem-text').value;
     const date = document.getElementById('rem-date').value;
-    if (!text || !date) return alert("Données manquantes");
+    if (!text || !date) return alert("Manque de données");
 
     reminders.push({ text, date });
     localStorage.setItem('sergioReminders', JSON.stringify(reminders));
@@ -115,7 +124,7 @@ function saveReminder() {
     goToHome();
 }
 
-// REPORTES
+// NOTAS
 function openFinishModal() { document.getElementById('modal-score').classList.remove('hidden'); }
 
 function saveFinalScore() {
@@ -127,5 +136,5 @@ function saveFinalScore() {
     goToHome();
 }
 
-// INICIAR
-window.onload = renderHome;
+// INICIALIZAR AL CARGAR
+document.addEventListener('DOMContentLoaded', renderHome);
