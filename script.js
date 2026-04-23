@@ -4,18 +4,16 @@ let currentThemeIdx = null;
 let currentStepIdx = 0;
 let myChart = null;
 
-// Base de datos - Versión 4 (Para forzar actualización)
-let db = JSON.parse(localStorage.getItem('sergioDataV4')) || {
+// Versión 5 de la base de datos (Para forzar que se vea música)
+let db = JSON.parse(localStorage.getItem('sergioV5')) || {
     histoire: [], francais: [], espagnol: [], anglais: [], allemand: [], physique: [], musique: []
 };
-let scores = JSON.parse(localStorage.getItem('sergioScoresV4')) || {};
-let reminders = JSON.parse(localStorage.getItem('sergioRemindersV4')) || [];
+let scores = JSON.parse(localStorage.getItem('sergioScoresV5')) || {};
+let reminders = JSON.parse(localStorage.getItem('sergioRemindersV5')) || [];
 
-// NAVEGACIÓN
 function showView(viewId) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    const target = document.getElementById(viewId);
-    if(target) target.classList.add('active');
+    document.getElementById(viewId).classList.add('active');
 }
 
 function goToHome() { showView('view-home'); renderHome(); }
@@ -25,9 +23,7 @@ function goBackToPath() { showView('view-theme-path'); }
 // INICIO
 function renderHome() {
     const grid = document.getElementById('subjects-grid');
-    if(!grid) return;
     grid.innerHTML = '';
-    
     materias.forEach(m => {
         const card = document.createElement('div');
         card.className = `subject-card card-${m}`;
@@ -42,26 +38,25 @@ function renderReminders() {
     const list = document.getElementById('reminders-list');
     const today = new Date().toISOString().split('T')[0];
     const active = reminders.filter(r => r.date >= today);
-    list.innerHTML = active.length ? '' : "<p>Aucun rappel.</p>";
+    list.innerHTML = active.length ? '' : "<p>Tout est à jour ! 👍</p>";
     active.forEach(r => {
-        list.innerHTML += `<div style="background:#fff5e6; padding:10px; border-radius:10px; margin-bottom:5px;">🗓 ${r.date}: ${r.text}</div>`;
+        list.innerHTML += `<div style="background:#fff5e6; padding:12px; border-radius:10px; margin-bottom:10px; font-weight:bold;">🗓 ${r.date}: ${r.text}</div>`;
     });
 }
 
-// LOGIN ADMIN
+// ADMIN LOGIN
 function showLogin() { showView('view-login'); }
 
 function checkAdminPassword() {
-    const input = document.getElementById('admin-pass-input').value;
-    if(input === "Gaby1429") {
+    if (document.getElementById('admin-pass-input').value === "Gaby1429") {
         showView('view-admin');
         document.getElementById('admin-pass-input').value = '';
     } else {
-        alert("Incorrect!");
+        alert("Mot de passe incorrect");
     }
 }
 
-// MATERIAS Y PROGRESO
+// MATERIAS
 function openSubject(m) {
     currentSub = m;
     showView('view-subject');
@@ -79,6 +74,7 @@ function openSubject(m) {
     renderChart(m);
 }
 
+// CAMINO DE PASOS (DESBLOQUEO)
 function openThemePath(themeIdx) {
     currentThemeIdx = themeIdx;
     const theme = db[currentSub][themeIdx];
@@ -90,7 +86,7 @@ function openThemePath(themeIdx) {
     const steps = [
         { name: "Présentation", data: theme.ppt, icon: "📽️" },
         { name: "Activité", data: theme.iframe, icon: "🎮" },
-        { name: "Web", data: theme.url, icon: "🌐" },
+        { name: "Ressource Web", data: theme.url, icon: "🌐" },
         { name: "Vidéo", data: theme.video, icon: "📺" },
         { name: "Examen", data: "EXAM", icon: "🎓" }
     ].filter(s => s.data);
@@ -99,7 +95,7 @@ function openThemePath(themeIdx) {
         const isLocked = idx > (theme.progress || 0);
         const btn = document.createElement('div');
         btn.className = `subject-card card-musique ${isLocked ? 'locked' : ''}`;
-        btn.style.height = "120px";
+        btn.style.height = "130px";
         btn.innerHTML = `<span class="subject-label">${step.icon} ${step.name}</span>`;
         if(!isLocked) btn.onclick = () => { currentStepIdx = idx; launchStep(step); };
         container.appendChild(btn);
@@ -110,7 +106,7 @@ function launchStep(step) {
     showView('view-activity');
     const place = document.getElementById('activity-place');
     if (step.data === "EXAM") {
-        place.innerHTML = "<h2>Examen Final</h2><p>Basé sur le PDF...</p>";
+        place.innerHTML = "<h2>Examen de la matière</h2><p>Basé sur vos exercices.</p>";
     } else {
         place.innerHTML = step.data.includes('<iframe') ? step.data : `<iframe src="${step.data}"></iframe>`;
     }
@@ -119,9 +115,15 @@ function launchStep(step) {
 function completeStep() {
     const theme = db[currentSub][currentThemeIdx];
     if (currentStepIdx === theme.progress) {
-        if(currentStepIdx === 1) document.getElementById('modal-score').classList.remove('hidden');
-        else { theme.progress++; saveDB(); openThemePath(currentThemeIdx); }
-    } else { goBackToPath(); }
+        if(currentStepIdx === 1) { // El paso de actividad pide nota
+            document.getElementById('modal-score').classList.remove('hidden');
+        } else {
+            theme.progress++;
+            saveAndGo();
+        }
+    } else {
+        goBackToPath();
+    }
 }
 
 function saveStepScore() {
@@ -129,13 +131,15 @@ function saveStepScore() {
     if(!scores[currentSub]) scores[currentSub] = [];
     scores[currentSub].push(n);
     db[currentSub][currentThemeIdx].progress++;
-    localStorage.setItem('sergioScoresV4', JSON.stringify(scores));
-    saveDB();
+    localStorage.setItem('sergioScoresV5', JSON.stringify(scores));
+    saveAndGo();
     document.getElementById('modal-score').classList.add('hidden');
-    openThemePath(currentThemeIdx);
 }
 
-function saveDB() { localStorage.setItem('sergioDataV4', JSON.stringify(db)); }
+function saveAndGo() {
+    localStorage.setItem('sergioV5', JSON.stringify(db));
+    openThemePath(currentThemeIdx);
+}
 
 // ADMIN ACCIONES
 function saveNewTheme() {
@@ -148,33 +152,32 @@ function saveNewTheme() {
         video: document.getElementById('adm-video').value,
         progress: 0
     });
-    saveDB();
-    alert("Thème ajouté !");
+    localStorage.setItem('sergioV5', JSON.stringify(db));
+    alert("Thème ajouté avec succès !");
     goToHome();
 }
 
 function saveReminder() {
     reminders.push({ text: document.getElementById('rem-text').value, date: document.getElementById('rem-date').value });
-    localStorage.setItem('sergioRemindersV4', JSON.stringify(reminders));
+    localStorage.setItem('sergioRemindersV5', JSON.stringify(reminders));
     goToHome();
 }
 
-// GRÁFICA
+// GRÁFICA DE APROVECHAMIENTO
 function renderChart(m) {
-    const ctx = document.getElementById('progressionChart');
-    if(!ctx) return;
+    const ctx = document.getElementById('progressionChart').getContext('2d');
     const hist = scores[m] || [0];
     const avg = hist.reduce((a,b) => a + parseInt(b), 0) / hist.length;
     if (myChart) myChart.destroy();
     myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: hist.map((_,i)=>`Note ${i+1}`),
-            datasets: [{ label: 'Score 1-20', data: hist, backgroundColor: '#E91E63' }]
+            labels: hist.map((_,i)=>`Ex. ${i+1}`),
+            datasets: [{ label: 'Note 1-20', data: hist, backgroundColor: '#E91E63', borderRadius: 10 }]
         },
         options: { scales: { y: { min:0, max:20 } } }
     });
-    document.getElementById('achievement-info').innerHTML = `Aprovechamiento: ${(avg/20*100).toFixed(0)}% | Predicción: ${avg.toFixed(1)}/20`;
+    document.getElementById('achievement-info').innerHTML = `Aprovechamiento: ${(avg/20*100).toFixed(0)}% | Predicción: ${avg.toFixed(1)} / 20`;
 }
 
 window.onload = renderHome;
