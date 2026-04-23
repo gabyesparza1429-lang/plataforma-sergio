@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sergio's Learning World</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Estilo de emergencia para que no se amontone todo */
-        .view { display: none; }
+        /* Estilo Crítico para evitar desorden */
+        .view { display: none; width: 100%; min-height: 100vh; padding: 20px; box-sizing: border-box; }
         .view.active { display: block; }
         .hidden { display: none !important; }
     </style>
@@ -17,11 +19,11 @@
     <div id="admin-trigger" onclick="showLogin()">⚙️</div>
 
     <section id="view-login" class="view">
-        <div class="login-box">
+        <div class="admin-card" style="max-width: 300px; margin: 100px auto; text-align: center;">
             <h3>Accès Gaby</h3>
-            <input type="password" id="admin-pass-input" placeholder="Mot de passe">
+            <input type="password" id="admin-pass-input" placeholder="Mot de passe" style="width:100%; margin-bottom:10px; padding:10px;">
             <button class="btn-save" onclick="checkAdminPassword()">Entrer</button>
-            <button class="btn-nav" onclick="goToHome()">Annuler</button>
+            <button class="btn-nav" onclick="goToHome()" style="margin-top:10px;">Annuler</button>
         </div>
     </section>
 
@@ -29,12 +31,11 @@
         <h1 class="main-title">Salut, Sergio ! 👋</h1>
         
         <div id="reminders-section" class="reminders-container">
-            <h3>📌 À faire (Pendientes)</h3>
+            <h3>📌 Rappels (Pendientes)</h3>
             <div id="reminders-list"></div>
         </div>
 
-        <div class="grid-subjects" id="subjects-grid">
-            </div>
+        <div class="grid-subjects" id="subjects-grid"></div>
     </main>
 
     <section id="view-subject" class="view">
@@ -42,7 +43,16 @@
             <button class="btn-nav" onclick="goToHome()">⬅ Retour</button>
             <h2 id="current-subject-title">MATIÈRE</h2>
         </div>
+
+        <div class="chart-container">
+            <h3>📊 Ton niveau actuel</h3>
+            <canvas id="progressionChart"></canvas>
+            <div id="achievement-info" class="achievement-box"></div>
+        </div>
+
         <div id="folders-container" class="folder-grid"></div>
+        
+        <button id="btn-exam" class="btn-finish hidden" style="background:#9b59b6;" onclick="startExam()">COMMENCER L'EXAMEN 🎓</button>
     </section>
 
     <section id="view-activity" class="view">
@@ -60,7 +70,7 @@
         </div>
         
         <div class="admin-card">
-            <h3>Ajouter Activité</h3>
+            <h3>➕ Ajouter Activité / Lien</h3>
             <select id="adm-materia">
                 <option value="histoire">Histoire</option>
                 <option value="francais">Français</option>
@@ -70,13 +80,20 @@
                 <option value="physique">Physique</option>
             </select>
             <input type="text" id="adm-tema" placeholder="Nom du thème">
-            <textarea id="adm-code" placeholder="Pega aquí el <iframe> de Wordwall"></textarea>
+            <textarea id="adm-code" placeholder="Code <iframe> o URL (http://...)"></textarea>
             <button class="btn-save" onclick="saveData()">Sauvegarder</button>
         </div>
 
         <div class="admin-card" style="margin-top:20px;">
-            <h3>Ajouter Rappel</h3>
-            <input type="text" id="rem-text" placeholder="Tarea o aviso">
+            <h3>📚 Banco de Preguntas (PDF)</h3>
+            <input type="file" id="pdf-upload" accept="application/pdf">
+            <button class="btn-save" style="background:#9b59b6;" onclick="processPDF()">Extraer Preguntas</button>
+            <p id="pdf-status"></p>
+        </div>
+
+        <div class="admin-card" style="margin-top:20px;">
+            <h3>📌 Rappel</h3>
+            <input type="text" id="rem-text" placeholder="Message pour Sergio">
             <input type="date" id="rem-date">
             <button class="btn-save" style="background:#e67e22;" onclick="saveReminder()">Ajouter</button>
         </div>
@@ -84,9 +101,9 @@
 
     <div id="modal-score" class="modal hidden">
         <div class="modal-content">
-            <h3>Super, Sergio !</h3>
-            <p>Quelle note as-tu eue ? (0-20)</p>
-            <input type="number" id="input-note" min="0" max="20" value="20">
+            <h3>Félicitations !</h3>
+            <p>Note Wordwall (1-20) :</p>
+            <input type="number" id="input-note" min="1" max="20" value="20">
             <button class="btn-save" onclick="saveFinalScore()">Valider</button>
         </div>
     </div>
