@@ -1,81 +1,75 @@
-// Base de datos de ejercicios
-const exercises = [
-    { q: "Combien font 7 x 8?", a: "56", options: ["48", "54", "56", "64"] },
-    { q: "Calcule: 120 / 4", a: "30", options: ["25", "30", "35", "40"] },
-    { q: "Si x + 5 = 12, alors x =", a: "7", options: ["5", "7", "8", "17"] }
-];
-
-let stats = JSON.parse(localStorage.getItem('sergioStats')) || {
-    math: { done: 0, score: 0, time: 0 }
+let db = JSON.parse(localStorage.getItem('sergioDB')) || {
+    histoire: [], francais: [], espagnol: [], anglais: [], allemand: [], physique: []
 };
 
-let currentIdx = 0;
-let startTime = Date.now();
+const subjects = ['histoire', 'francais', 'espagnol', 'anglais', 'allemand', 'physique'];
 
+// Cargar el Dashboard
 function init() {
-    renderQuestion();
-    updateReportUI();
-    startTimer();
-}
-
-function startTimer() {
-    setInterval(() => {
-        stats.math.time++;
-        document.getElementById('timer').innerText = formatTime(stats.math.time);
-        save();
-    }, 1000);
-}
-
-function renderQuestion() {
-    const q = exercises[currentIdx];
-    document.getElementById('question-text').innerText = q.q;
-    const grid = document.getElementById('options-grid');
+    const grid = document.getElementById('subjects-grid');
     grid.innerHTML = '';
-    
-    q.options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.innerText = opt;
-        btn.onclick = () => checkAnswer(opt);
-        grid.appendChild(btn);
+    subjects.forEach(sub => {
+        const card = document.createElement('div');
+        card.className = 'subject-card';
+        card.style.backgroundImage = `url('img/${sub}.png')`; // Espacio para tus imágenes
+        card.innerHTML = `<div class="label">${sub}</div>`;
+        card.onclick = () => openSubject(sub);
+        grid.appendChild(card);
     });
 }
 
-function checkAnswer(ans) {
-    if(ans === exercises[currentIdx].a) {
-        stats.math.score += 20 / exercises.length; // Escala francesa sobre 20
-        alert("Excellent! 🌟");
-    }
-    
-    stats.math.done++;
-    currentIdx++;
-    
-    if(currentIdx < exercises.length) {
-        renderQuestion();
+function openAdmin() {
+    const pass = prompt("Contraseña de Administrador:");
+    if (pass === "Gaby1429") {
+        document.getElementById('home-screen').classList.add('hidden');
+        document.getElementById('admin-panel').classList.remove('hidden');
     } else {
-        document.getElementById('question-card').innerHTML = "<h2>Session Terminée!</h2>";
-        document.getElementById('exam-btn').classList.remove('hidden');
+        alert("Incorrecto");
     }
-    updateReportUI();
-    save();
 }
 
-function updateReportUI() {
-    const r = stats.math;
-    document.getElementById('report-display').innerHTML = `
-        <p>Activités terminées: ${r.done}</p>
-        <p>Note actuelle: ${Math.round(r.score)} / 20</p>
+function saveContent() {
+    const materia = document.getElementById('materia-select').value;
+    const folder = document.getElementById('folder-name').value;
+    const code = document.getElementById('iframe-code').value;
+
+    if(!folder || !code) return alert("Llena todos los campos");
+
+    db[materia].push({ theme: folder, content: code });
+    localStorage.setItem('sergioDB', JSON.stringify(db));
+    alert("¡Contenido subido con éxito!");
+}
+
+function openSubject(sub) {
+    document.getElementById('home-screen').classList.add('hidden');
+    document.getElementById('subject-view').classList.remove('hidden');
+    document.getElementById('current-subject-title').innerText = sub;
+    
+    const container = document.getElementById('folders-container');
+    container.innerHTML = '';
+
+    db[sub].forEach((item, index) => {
+        const folder = document.createElement('div');
+        folder.className = 'folder-icon';
+        folder.innerText = item.theme;
+        folder.onclick = () => launchActivity(item.content);
+        container.appendChild(folder);
+    });
+}
+
+function launchActivity(iframeHtml) {
+    // Reemplaza el contenido por el Iframe y añade el botón "J'ai fini"
+    const view = document.getElementById('subject-view');
+    view.innerHTML = `
+        <button class="back-btn" onclick="location.reload()">⬅ Retour</button>
+        <div class="activity-frame">${iframeHtml}</div>
+        <button class="finish-btn" onclick="showFinishModal()">J'ai fini !</button>
     `;
 }
 
-function formatTime(s) {
-    const min = Math.floor(s / 60);
-    const seg = s % 60;
-    return `${min}:${seg < 10 ? '0' : ''}${seg}`;
+function showFinishModal() {
+    document.getElementById('finish-modal').classList.remove('hidden');
 }
 
-function save() {
-    localStorage.setItem('sergioStats', JSON.stringify(stats));
-}
-
+// Inicializar
 init();
