@@ -1,32 +1,47 @@
-/* ... (mantiene todo el CSS anterior y agrega esto) ... */
+:root {
+    --bg: #E3E9EF;
+}
 
-.reminders-container {
-    background: white;
+body { background-color: var(--bg); margin: 0; font-family: 'Comic Sans MS', sans-serif; }
+.view { width: 100%; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+.hidden { display: none !important; }
+
+/* HOME GRID */
+.grid-subjects {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
     max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 20px;
-    border-left: 10px solid #e67e22; /* Color naranja para atención */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    margin: 0 auto;
 }
 
-.reminders-container h3 {
-    margin-top: 0;
-    color: #e67e22;
+.subject-card {
+    height: 250px; border-radius: 25px; display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 25px; cursor: pointer; position: relative; border-bottom: 12px solid rgba(0,0,0,0.2);
 }
 
-.reminder-item {
-    background: #fff5e6;
-    margin: 10px 0;
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid #ffe0b3;
-    font-size: 1.1rem;
-}
+.subject-card::before { position: absolute; top: 15px; font-size: 8rem; opacity: 0.3; }
 
-/* Estilo para el botón admin flotante */
-#admin-access:hover {
-    opacity: 1 !important;
-    transform: rotate(45deg);
-    transition: 0.3s;
-}
+.subject-label { background: white; padding: 10px 25px; border-radius: 15px; font-weight: bold; font-size: 1.4rem; text-transform: uppercase; }
+
+/* COLORES */
+.card-histoire { background: linear-gradient(#FF5722, #D84315); } .card-histoire::before { content: '🏰'; }
+.card-francais { background: linear-gradient(#2196F3, #1565C0); } .card-francais::before { content: '📖'; }
+.card-espagnol { background: linear-gradient(#F44336, #C62828); } .card-espagnol::before { content: '🇪🇸'; }
+.card-anglais { background: linear-gradient(#9C27B0, #6A1B9A); } .card-anglais::before { content: '💂'; }
+.card-allemand { background: linear-gradient(#FFEB3B, #F9A825); } .card-allemand::before { content: '🥨'; }
+.card-physique { background: linear-gradient(#4CAF50, #2E7D32); } .card-physique::before { content: '🧪'; }
+
+/* PENDIENTES */
+.reminders-container { background: white; max-width: 1200px; margin: 0 auto 30px auto; padding: 20px; border-radius: 20px; border-left: 10px solid #e67e22; }
+.reminder-item { background: #fff5e6; margin: 10px 0; padding: 15px; border-radius: 10px; font-weight: bold; }
+
+/* OTROS */
+.folder-icon { background: #FFD54F; padding: 30px; border-radius: 20px; text-align: center; font-weight: bold; box-shadow: 0 6px 0 #F9A825; cursor: pointer; }
+.header-nav { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+.btn-nav { padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; background: #95a5a6; color: white; }
+.btn-save { padding: 15px; background: #3498db; color: white; border: none; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; }
+.iframe-wrapper iframe { width: 100%; height: 550px; border: none; border-radius: 20px; background: white; }
+#admin-trigger { position: fixed; bottom: 15px; right: 15px; font-size: 25px; cursor: pointer; opacity: 0.4; z-index: 1000; }
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+.modal-content { background: white; padding: 40px; border-radius: 30px; text-align: center; }
