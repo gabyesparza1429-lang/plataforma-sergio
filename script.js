@@ -4,25 +4,30 @@ let currentThemeIdx = null;
 let currentStepIdx = 0;
 let myChart = null;
 
-// Cargar Datos
-let db = JSON.parse(localStorage.getItem('sergioDataV3')) || {
+// Base de datos - Versión 4 (Para forzar actualización)
+let db = JSON.parse(localStorage.getItem('sergioDataV4')) || {
     histoire: [], francais: [], espagnol: [], anglais: [], allemand: [], physique: [], musique: []
 };
-let scores = JSON.parse(localStorage.getItem('sergioScores')) || {};
-let reminders = JSON.parse(localStorage.getItem('sergioReminders')) || [];
+let scores = JSON.parse(localStorage.getItem('sergioScoresV4')) || {};
+let reminders = JSON.parse(localStorage.getItem('sergioRemindersV4')) || [];
 
+// NAVEGACIÓN
 function showView(viewId) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById(viewId).classList.add('active');
+    const target = document.getElementById(viewId);
+    if(target) target.classList.add('active');
 }
 
 function goToHome() { showView('view-home'); renderHome(); }
 function goToSubject() { showView('view-subject'); }
 function goBackToPath() { showView('view-theme-path'); }
 
+// INICIO
 function renderHome() {
     const grid = document.getElementById('subjects-grid');
+    if(!grid) return;
     grid.innerHTML = '';
+    
     materias.forEach(m => {
         const card = document.createElement('div');
         card.className = `subject-card card-${m}`;
@@ -35,23 +40,39 @@ function renderHome() {
 
 function renderReminders() {
     const list = document.getElementById('reminders-list');
-    list.innerHTML = '';
     const today = new Date().toISOString().split('T')[0];
-    reminders.filter(r => r.date >= today).forEach(r => {
-        list.innerHTML += `<div style="background:#fff5e6; margin-bottom:5px; padding:10px; border-radius:10px;">🗓 ${r.date}: ${r.text}</div>`;
+    const active = reminders.filter(r => r.date >= today);
+    list.innerHTML = active.length ? '' : "<p>Aucun rappel.</p>";
+    active.forEach(r => {
+        list.innerHTML += `<div style="background:#fff5e6; padding:10px; border-radius:10px; margin-bottom:5px;">🗓 ${r.date}: ${r.text}</div>`;
     });
 }
 
+// LOGIN ADMIN
+function showLogin() { showView('view-login'); }
+
+function checkAdminPassword() {
+    const input = document.getElementById('admin-pass-input').value;
+    if(input === "Gaby1429") {
+        showView('view-admin');
+        document.getElementById('admin-pass-input').value = '';
+    } else {
+        alert("Incorrect!");
+    }
+}
+
+// MATERIAS Y PROGRESO
 function openSubject(m) {
     currentSub = m;
     showView('view-subject');
     document.getElementById('current-subject-title').innerText = m.toUpperCase();
     const container = document.getElementById('folders-container');
     container.innerHTML = '';
+    
     (db[m] || []).forEach((theme, idx) => {
         const folder = document.createElement('div');
         folder.className = 'folder-icon';
-        folder.innerHTML = `<h3>📂 ${theme.name}</h3>`;
+        folder.innerHTML = `📂 ${theme.name}`;
         folder.onclick = () => openThemePath(idx);
         container.appendChild(folder);
     });
@@ -67,22 +88,20 @@ function openThemePath(themeIdx) {
     container.innerHTML = '';
 
     const steps = [
-        { name: "1. Présentation", data: theme.ppt, icon: "📽️" },
-        { name: "2. Activité", data: theme.iframe, icon: "🎮" },
-        { name: "3. Ressource Web", data: theme.url, icon: "🌐" },
-        { name: "4. Vidéo", data: theme.video, icon: "📺" },
-        { name: "5. Examen", data: "EXAM", icon: "🎓" }
+        { name: "Présentation", data: theme.ppt, icon: "📽️" },
+        { name: "Activité", data: theme.iframe, icon: "🎮" },
+        { name: "Web", data: theme.url, icon: "🌐" },
+        { name: "Vidéo", data: theme.video, icon: "📺" },
+        { name: "Examen", data: "EXAM", icon: "🎓" }
     ].filter(s => s.data);
 
     steps.forEach((step, idx) => {
-        const btn = document.createElement('div');
         const isLocked = idx > (theme.progress || 0);
-        btn.className = `subject-card ${isLocked ? 'locked' : 'card-musique'}`;
-        btn.style.height = "150px";
+        const btn = document.createElement('div');
+        btn.className = `subject-card card-musique ${isLocked ? 'locked' : ''}`;
+        btn.style.height = "120px";
         btn.innerHTML = `<span class="subject-label">${step.icon} ${step.name}</span>`;
-        if(!isLocked) {
-            btn.onclick = () => { currentStepIdx = idx; launchStep(step); };
-        }
+        if(!isLocked) btn.onclick = () => { currentStepIdx = idx; launchStep(step); };
         container.appendChild(btn);
     });
 }
@@ -91,7 +110,7 @@ function launchStep(step) {
     showView('view-activity');
     const place = document.getElementById('activity-place');
     if (step.data === "EXAM") {
-        place.innerHTML = "<h2>Examen Final</h2><p>Prépare-toi pour les questions...</p>";
+        place.innerHTML = "<h2>Examen Final</h2><p>Basé sur le PDF...</p>";
     } else {
         place.innerHTML = step.data.includes('<iframe') ? step.data : `<iframe src="${step.data}"></iframe>`;
     }
@@ -101,54 +120,49 @@ function completeStep() {
     const theme = db[currentSub][currentThemeIdx];
     if (currentStepIdx === theme.progress) {
         if(currentStepIdx === 1) document.getElementById('modal-score').classList.remove('hidden');
-        else { theme.progress++; saveAndReload(); }
+        else { theme.progress++; saveDB(); openThemePath(currentThemeIdx); }
     } else { goBackToPath(); }
 }
 
 function saveStepScore() {
-    const note = document.getElementById('input-note').value;
+    const n = document.getElementById('input-note').value;
     if(!scores[currentSub]) scores[currentSub] = [];
-    scores[currentSub].push(note);
+    scores[currentSub].push(n);
     db[currentSub][currentThemeIdx].progress++;
-    localStorage.setItem('sergioScores', JSON.stringify(scores));
-    saveAndReload();
+    localStorage.setItem('sergioScoresV4', JSON.stringify(scores));
+    saveDB();
     document.getElementById('modal-score').classList.add('hidden');
-}
-
-function saveAndReload() {
-    localStorage.setItem('sergioDataV3', JSON.stringify(db));
     openThemePath(currentThemeIdx);
 }
 
-function checkAdminPassword() {
-    if(document.getElementById('admin-pass-input').value === "Gaby1429") showView('view-admin');
-    else alert("Incorrect");
-}
+function saveDB() { localStorage.setItem('sergioDataV4', JSON.stringify(db)); }
 
+// ADMIN ACCIONES
 function saveNewTheme() {
     const mat = document.getElementById('adm-materia').value;
-    const newTheme = {
+    db[mat].push({
         name: document.getElementById('adm-tema-name').value,
         ppt: document.getElementById('adm-ppt').value,
         iframe: document.getElementById('adm-iframe').value,
         url: document.getElementById('adm-url').value,
         video: document.getElementById('adm-video').value,
         progress: 0
-    };
-    db[mat].push(newTheme);
-    localStorage.setItem('sergioDataV3', JSON.stringify(db));
+    });
+    saveDB();
     alert("Thème ajouté !");
     goToHome();
 }
 
 function saveReminder() {
     reminders.push({ text: document.getElementById('rem-text').value, date: document.getElementById('rem-date').value });
-    localStorage.setItem('sergioReminders', JSON.stringify(reminders));
+    localStorage.setItem('sergioRemindersV4', JSON.stringify(reminders));
     goToHome();
 }
 
+// GRÁFICA
 function renderChart(m) {
-    const ctx = document.getElementById('progressionChart').getContext('2d');
+    const ctx = document.getElementById('progressionChart');
+    if(!ctx) return;
     const hist = scores[m] || [0];
     const avg = hist.reduce((a,b) => a + parseInt(b), 0) / hist.length;
     if (myChart) myChart.destroy();
@@ -156,11 +170,11 @@ function renderChart(m) {
         type: 'bar',
         data: {
             labels: hist.map((_,i)=>`Note ${i+1}`),
-            datasets: [{ label: 'Score 1-20', data: hist, backgroundColor: '#e91e63' }]
+            datasets: [{ label: 'Score 1-20', data: hist, backgroundColor: '#E91E63' }]
         },
         options: { scales: { y: { min:0, max:20 } } }
     });
-    document.getElementById('achievement-info').innerHTML = `Aprovechamiento: ${(avg/20*100).toFixed(0)}% <br> Predicción examen: ${avg.toFixed(1)}/20`;
+    document.getElementById('achievement-info').innerHTML = `Aprovechamiento: ${(avg/20*100).toFixed(0)}% | Predicción: ${avg.toFixed(1)}/20`;
 }
 
 window.onload = renderHome;
