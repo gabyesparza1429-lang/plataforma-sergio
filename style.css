@@ -1,52 +1,53 @@
 :root {
-    --primary: #4A90E2;
-    --success: #2ECC71;
-    --bg: #F5F7FA;
+    --roblox-blue: #00A2FF;
+    --roblox-green: #00E676;
+    --shadow: #0076BA;
 }
 
 body {
-    background-color: var(--bg);
-    font-family: 'Arial', sans-serif;
-    display: flex;
-    justify-content: center;
+    background: #E3E9EF;
+    font-family: 'Comic Sans MS', sans-serif; /* Fuente amigable para TDA */
+    margin: 0;
+    overflow-x: hidden;
+}
+
+.grid-subjects {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
     padding: 20px;
 }
 
-.container {
-    width: 100%;
-    max-width: 600px;
-}
-
-#question-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.option-btn {
-    background: white;
-    border: 3px solid var(--primary);
-    border-radius: 12px;
-    padding: 15px;
-    margin: 10px;
-    width: 100%;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.option-btn:hover {
-    background: var(--primary);
+.subject-card {
+    background: var(--roblox-blue);
+    border-radius: 15px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
     color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-bottom: 8px solid var(--shadow);
+    cursor: pointer;
+    transition: transform 0.1s;
+    background-size: cover;
+    background-position: center;
 }
 
-.hidden { display: none; }
+.subject-card:active {
+    transform: translateY(4px);
+    border-bottom-width: 2px;
+}
 
-#report-display {
-    background: #fff;
-    padding: 15px;
+.hidden { display: none !important; }
+
+/* Estilo Folder */
+.folder-icon {
+    background: #FFD54F;
+    padding: 20px;
     border-radius: 10px;
+    text-align: center;
+    box-shadow: 4px 4px 0px #FFA000;
 }
