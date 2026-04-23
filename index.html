@@ -3,29 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sergio's Learning World</title>
+    <title>Sergio's World</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilo de emergencia: Oculta todo excepto la vista activa */
+        .view { display: none; width: 100%; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .view.active { display: block !important; }
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
 
     <div id="admin-trigger" onclick="showLogin()" style="position: fixed; bottom: 20px; right: 20px; font-size: 30px; cursor: pointer; z-index: 9999; background: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">⚙️</div>
 
     <section id="view-login" class="view">
-        <div class="modal-content" style="margin: 100px auto;">
+        <div class="admin-card" style="margin: 100px auto; max-width: 400px; text-align: center;">
             <h3>Accès Gaby 👩‍🏫</h3>
-            <input type="password" id="admin-pass-input" placeholder="Mot de passe" style="padding:10px; width:80%; margin-bottom:10px;">
-            <br>
+            <input type="password" id="admin-pass-input" placeholder="Mot de passe" style="width: 90%; padding: 15px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #ccc;">
             <button class="btn-save" onclick="checkAdminPassword()">Entrer</button>
-            <button class="btn-nav" onclick="goToHome()">Annuler</button>
+            <button class="btn-nav" onclick="goToHome()" style="margin-top: 10px;">Annuler</button>
         </div>
     </section>
 
     <main id="view-home" class="view active">
         <h1 class="main-title">Salut, Sergio ! 👋</h1>
         <div id="reminders-section" class="reminders-container">
-            <h3>📌 Rappels</h3>
+            <h3>📌 Rappels (Pendientes)</h3>
             <div id="reminders-list"></div>
         </div>
         <div class="grid-subjects" id="subjects-grid"></div>
@@ -65,6 +70,7 @@
             <h2>Configuration Gaby</h2>
         </div>
         <div class="admin-card">
+            <h3>➕ Nouveau Thème</h3>
             <select id="adm-materia">
                 <option value="histoire">Histoire</option>
                 <option value="francais">Français</option>
@@ -79,20 +85,21 @@
             <textarea id="adm-iframe" placeholder="2. Wordwall Iframe"></textarea>
             <input type="text" id="adm-url" placeholder="3. URL externa">
             <input type="text" id="adm-video" placeholder="4. YouTube Link">
-            <button class="btn-save" onclick="saveNewTheme()">Sauvegarder le thème</button>
+            <button class="btn-save" onclick="saveNewTheme()">Sauvegarder</button>
         </div>
-        <div class="admin-card" style="margin-top:10px;">
+        <div class="admin-card" style="margin-top:20px;">
+            <h3>📌 Nouveau Rappel</h3>
             <input type="text" id="rem-text" placeholder="Recordatorio">
             <input type="date" id="rem-date">
-            <button class="btn-save" style="background:#e67e22;" onclick="saveReminder()">Ajouter Rappel</button>
+            <button class="btn-save" style="background:#e67e22;" onclick="saveReminder()">Ajouter</button>
         </div>
     </section>
 
     <div id="modal-score" class="modal hidden">
         <div class="modal-content">
-            <h3>Bien joué Sergio ! 🎉</h3>
-            <p>Note obtenue (1-20):</p>
-            <input type="number" id="input-note" min="1" max="20" value="20">
+            <h3>Bien joué ! 🎉</h3>
+            <p>Note obtenue (1-20) :</p>
+            <input type="number" id="input-note" min="1" max="20" value="20" style="font-size: 2rem; width: 80px; text-align: center;">
             <button class="btn-save" onclick="saveStepScore()">Valider</button>
         </div>
     </div>
