@@ -1,46 +1,35 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Plataforma de Aprendizaje - Sergio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plateforme d'Études - Sergio</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>Panel de Estudio - Sistema Francés</h1>
-        <div id="stats-header">
-            Materia: <span id="current-subject">Mathématiques</span> | 
-            Tiempo: <span id="timer">00:00</span>
-        </div>
-    </header>
+    <div class="container">
+        <header>
+            <h1>Bonjour, Sergio! 👋</h1>
+            <div id="stats-bar">
+                <span>Matière: <strong id="subject-name">Maths</strong></span>
+                <span>Temps: <strong id="timer">00:00</strong></span>
+            </div>
+        </header>
 
-    <main id="app-container">
-        <section id="exercise-area">
-            <h2 id="question">Cargando ejercicio...</h2>
-            <div id="options"></div>
-            <button onclick="checkAnswer()">Enviar Respuesta</button>
+        <section id="game-container">
+            <div id="question-card">
+                <h2 id="question-text">Chargement...</h2>
+                <div id="options-grid"></div>
+            </div>
         </section>
 
-        <hr>
-
-        <section id="report-area">
-            <h3>Reporte de Progreso</h3>
-            <table border="1" id="report-table">
-                <thead>
-                    <tr>
-                        <th>Materia</th>
-                        <th>Actividades</th>
-                        <th>Tiempo Total</th>
-                        <th>Nota Media</th>
-                    </tr>
-                </thead>
-                <tbody id="report-body">
-                    </tbody>
-            </table>
-            <button id="exam-btn" style="display:none;" onclick="generateExam()">Generar Examen Final</button>
+        <section id="report-section">
+            <h3>Rapport de Progrès</h3>
+            <div id="report-display">
+                </div>
+            <button id="exam-btn" class="hidden" onclick="startExam()">Commencer l'Examen Final 🎓</button>
         </section>
-    </main>
-
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
