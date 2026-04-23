@@ -9,12 +9,18 @@
 </head>
 <body>
 
-    <div id="admin-access" onclick="openAdmin()">⚙️</div>
+    <div id="admin-access" onclick="openAdmin()" style="cursor: pointer; position: fixed; bottom: 10px; right: 10px; font-size: 20px; opacity: 0.5; z-index: 9999;">⚙️</div>
 
     <main id="view-home" class="view">
         <h1 class="main-title">Salut, Sergio ! 👋</h1>
-        <div class="grid-subjects" id="subjects-grid">
-            </div>
+        
+        <div id="reminders-section" class="reminders-container">
+            <h3>📌 À faire (Pendientes)</h3>
+            <div id="reminders-list">
+                </div>
+        </div>
+
+        <div class="grid-subjects" id="subjects-grid"></div>
     </main>
 
     <section id="view-subject" class="view hidden">
@@ -27,7 +33,7 @@
 
     <section id="view-activity" class="view hidden">
         <div class="header-nav">
-            <button class="btn-nav" onclick="showView('view-subject')">⬅ Retour aux thèmes</button>
+            <button class="btn-nav" onclick="showView('view-subject')">⬅ Retour</button>
         </div>
         <div id="activity-place" class="iframe-wrapper"></div>
         <button class="btn-finish" onclick="openFinishModal()">J'AI FINI ! 🌟</button>
@@ -38,8 +44,9 @@
             <button class="btn-nav" onclick="showView('view-home')">Fermer</button>
             <h2>Configuration Gaby</h2>
         </div>
+        
         <div class="admin-card">
-            <h3>Ajouter une activité</h3>
+            <h3>📖 Ajouter une activité</h3>
             <select id="adm-materia">
                 <option value="histoire">Histoire</option>
                 <option value="francais">Français</option>
@@ -49,8 +56,15 @@
                 <option value="physique">Physique</option>
             </select>
             <input type="text" id="adm-tema" placeholder="Nom du thème">
-            <textarea id="adm-code" placeholder="Coller le code <iframe> de Wordwall"></textarea>
-            <button class="btn-save" onclick="saveData()">Sauvegarder</button>
+            <textarea id="adm-code" placeholder="Code <iframe> de Wordwall"></textarea>
+            <button class="btn-save" onclick="saveData()">Sauvegarder Actividad</button>
+        </div>
+
+        <div class="admin-card" style="margin-top: 20px;">
+            <h3>📌 Ajouter un Rappel (Recordatorio)</h3>
+            <input type="text" id="rem-text" placeholder="¿Qué debe hacer Sergio?">
+            <input type="date" id="rem-date">
+            <button class="btn-save" style="background: #e67e22;" onclick="saveReminder()">Ajouter Rappel</button>
         </div>
     </section>
 
