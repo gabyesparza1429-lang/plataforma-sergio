@@ -11,29 +11,36 @@
 
     <div id="admin-access" onclick="openAdmin()">⚙️</div>
 
-    <main id="home-screen">
+    <main id="view-home" class="view">
         <h1 class="main-title">Salut, Sergio ! 👋</h1>
         <div class="grid-subjects" id="subjects-grid">
             </div>
     </main>
 
-    <section id="subject-view" class="hidden">
-        <div class="header-view">
-            <button class="back-btn" onclick="showHome()">⬅ Retour</button>
+    <section id="view-subject" class="view hidden">
+        <div class="header-nav">
+            <button class="btn-nav" onclick="showView('view-home')">⬅ Retour</button>
             <h2 id="current-subject-title">Matière</h2>
         </div>
         <div id="folders-container" class="folder-grid"></div>
     </section>
 
-    <section id="admin-panel" class="hidden">
-        <div class="header-view">
-            <button class="back-btn" onclick="showHome()">Quitter</button>
-            <h2>Panel de Gaby 👩‍🏫</h2>
+    <section id="view-activity" class="view hidden">
+        <div class="header-nav">
+            <button class="btn-nav" onclick="showView('view-subject')">⬅ Retour aux thèmes</button>
         </div>
-        
-        <div class="admin-box">
-            <h3>Subir Nueva Actividad</h3>
-            <select id="materia-select">
+        <div id="activity-place" class="iframe-wrapper"></div>
+        <button class="btn-finish" onclick="openFinishModal()">J'AI FINI ! 🌟</button>
+    </section>
+
+    <section id="view-admin" class="view hidden">
+        <div class="header-nav">
+            <button class="btn-nav" onclick="showView('view-home')">Fermer</button>
+            <h2>Configuration Gaby</h2>
+        </div>
+        <div class="admin-card">
+            <h3>Ajouter une activité</h3>
+            <select id="adm-materia">
                 <option value="histoire">Histoire</option>
                 <option value="francais">Français</option>
                 <option value="espagnol">Espagnol</option>
@@ -41,26 +48,18 @@
                 <option value="allemand">Allemand</option>
                 <option value="physique">Physique</option>
             </select>
-            <input type="text" id="folder-name" placeholder="Nombre del Tema (ej: La Revolución)">
-            <textarea id="iframe-code" placeholder="Pega el código <iframe> aquí"></textarea>
-            <button class="save-btn" onclick="saveContent()">Guardar Actividad</button>
-        </div>
-
-        <div class="admin-box" style="margin-top:20px;">
-            <h3>Generador de Examen (PDF)</h3>
-            <input type="file" id="pdf-upload" accept="application/pdf">
-            <button class="save-btn" style="background:#9b59b6;" onclick="processPDF()">Crear Examen desde PDF</button>
-            <p id="pdf-status"></p>
+            <input type="text" id="adm-tema" placeholder="Nom du thème">
+            <textarea id="adm-code" placeholder="Coller le code <iframe> de Wordwall"></textarea>
+            <button class="btn-save" onclick="saveData()">Sauvegarder</button>
         </div>
     </section>
 
-    <div id="finish-modal" class="hidden">
+    <div id="modal-score" class="modal hidden">
         <div class="modal-content">
-            <h3>Super, Sergio ! 🎉</h3>
-            <p>Quelle note as-tu obtenue sur Wordwall ?</p>
-            <input type="number" id="final-note" min="0" max="20" value="20">
-            <p style="font-size: 0.8rem;">(Note sur 20)</p>
-            <button onclick="submitScore()">Enregistrer ma note</button>
+            <h3>Bien joué ! 🎉</h3>
+            <p>Quelle note as-tu eue ? (0-20)</p>
+            <input type="number" id="input-note" min="0" max="20" value="20">
+            <button class="btn-save" onclick="saveFinalScore()">Valider</button>
         </div>
     </div>
 
