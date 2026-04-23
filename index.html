@@ -8,9 +8,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Estilo Crítico para evitar desorden */
         .view { display: none; width: 100%; min-height: 100vh; padding: 20px; box-sizing: border-box; }
         .view.active { display: block; }
+        .locked { filter: grayscale(1); opacity: 0.5; pointer-events: none !important; cursor: not-allowed; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -29,12 +29,10 @@
 
     <main id="view-home" class="view active">
         <h1 class="main-title">Salut, Sergio ! 👋</h1>
-        
         <div id="reminders-section" class="reminders-container">
-            <h3>📌 Rappels (Pendientes)</h3>
+            <h3>📌 Rappels</h3>
             <div id="reminders-list"></div>
         </div>
-
         <div class="grid-subjects" id="subjects-grid"></div>
     </main>
 
@@ -43,34 +41,37 @@
             <button class="btn-nav" onclick="goToHome()">⬅ Retour</button>
             <h2 id="current-subject-title">MATIÈRE</h2>
         </div>
-
         <div class="chart-container">
             <h3>📊 Ton niveau actuel</h3>
             <canvas id="progressionChart"></canvas>
             <div id="achievement-info" class="achievement-box"></div>
         </div>
-
         <div id="folders-container" class="folder-grid"></div>
-        
-        <button id="btn-exam" class="btn-finish hidden" style="background:#9b59b6;" onclick="startExam()">COMMENCER L'EXAMEN 🎓</button>
+    </section>
+
+    <section id="view-theme-path" class="view">
+        <div class="header-nav">
+            <button class="btn-nav" onclick="goToSubject()">⬅ Retour aux thèmes</button>
+            <h2 id="path-theme-title">TEMA</h2>
+        </div>
+        <div id="path-buttons-container" class="grid-subjects" style="margin-top:40px;"></div>
     </section>
 
     <section id="view-activity" class="view">
         <div class="header-nav">
-            <button class="btn-nav" onclick="goToSubject()">⬅ Retour</button>
+            <button class="btn-nav" onclick="goBackToPath()">⬅ Retour</button>
         </div>
         <div id="activity-place" class="iframe-wrapper"></div>
-        <button class="btn-finish" onclick="openFinishModal()">J'AI FINI ! 🌟</button>
+        <button class="btn-finish" onclick="completeStep()">J'AI FINI ! 🌟</button>
     </section>
 
     <section id="view-admin" class="view">
         <div class="header-nav">
             <button class="btn-nav" onclick="goToHome()">Quitter</button>
-            <h2>Panel de Gaby 👩‍🏫</h2>
+            <h2>Configuration Gaby</h2>
         </div>
-        
         <div class="admin-card">
-            <h3>➕ Ajouter Activité / Lien</h3>
+            <h3>➕ Créer un nouveau thème</h3>
             <select id="adm-materia">
                 <option value="histoire">Histoire</option>
                 <option value="francais">Français</option>
@@ -78,22 +79,27 @@
                 <option value="anglais">Anglais</option>
                 <option value="allemand">Allemand</option>
                 <option value="physique">Physique</option>
+                <option value="musique">Musique</option>
             </select>
-            <input type="text" id="adm-tema" placeholder="Nom du thème">
-            <textarea id="adm-code" placeholder="Code <iframe> o URL (http://...)"></textarea>
-            <button class="btn-save" onclick="saveData()">Sauvegarder</button>
+            <input type="text" id="adm-tema-name" placeholder="Nom du thème">
+            <hr>
+            <p>Remplis les étapes :</p>
+            <textarea id="adm-ppt" placeholder="Step 1: Link de PowerPoint (Embed)"></textarea>
+            <textarea id="adm-iframe" placeholder="Step 2: Code <iframe> Wordwall"></textarea>
+            <input type="text" id="adm-url" placeholder="Step 3: Link de URL externo">
+            <input type="text" id="adm-video" placeholder="Step 4: Link de Video (YouTube)">
+            <button class="btn-save" onclick="saveNewTheme()">Sauvegarder</button>
         </div>
-
+        
         <div class="admin-card" style="margin-top:20px;">
             <h3>📚 Banco de Preguntas (PDF)</h3>
             <input type="file" id="pdf-upload" accept="application/pdf">
-            <button class="btn-save" style="background:#9b59b6;" onclick="processPDF()">Extraer Preguntas</button>
-            <p id="pdf-status"></p>
+            <button class="btn-save" style="background:#9b59b6;" onclick="processPDF()">Extraer</button>
         </div>
 
         <div class="admin-card" style="margin-top:20px;">
             <h3>📌 Rappel</h3>
-            <input type="text" id="rem-text" placeholder="Message pour Sergio">
+            <input type="text" id="rem-text" placeholder="Message">
             <input type="date" id="rem-date">
             <button class="btn-save" style="background:#e67e22;" onclick="saveReminder()">Ajouter</button>
         </div>
@@ -101,10 +107,10 @@
 
     <div id="modal-score" class="modal hidden">
         <div class="modal-content">
-            <h3>Félicitations !</h3>
+            <h3>Bien joué !</h3>
             <p>Note Wordwall (1-20) :</p>
             <input type="number" id="input-note" min="1" max="20" value="20">
-            <button class="btn-save" onclick="saveFinalScore()">Valider</button>
+            <button class="btn-save" onclick="saveStepScore()">Valider</button>
         </div>
     </div>
 
