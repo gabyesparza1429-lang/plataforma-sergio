@@ -1,53 +1,360 @@
+/* =========================================
+   1. VARIABLES Y CONFIGURACIÓN BASE
+   ========================================= */
 :root {
-    --roblox-blue: #00A2FF;
-    --roblox-green: #00E676;
-    --shadow: #0076BA;
+    /* Colores UI Principal */
+    --bg-color: #E3E9EF; /* Gris azulado suave, descansa la vista */
+    --text-color: #2C3E50;
+    --admin-purple: #9b59b6;
+    --success-green: #2ecc71;
+    
+    /* Configuración Roblox (Efecto 3D) */
+    --roblox-shadow-opacity: 0.2;
+    --roblox-press-depth: 6px; /* Cuánto se hunde el botón */
+}
+
+* {
+    box-sizing: border-box; /* Crucial para layouts */
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    background: #E3E9EF;
-    font-family: 'Comic Sans MS', sans-serif; /* Fuente amigable para TDA */
-    margin: 0;
+    background-color: var(--bg-color);
+    font-family: 'Comic Sans MS', 'Arial', sans-serif; /* Fuente amigable TDA */
+    color: var(--text-color);
     overflow-x: hidden;
+    padding-bottom: 50px; /* Espacio al final */
 }
 
+/* Clases de Utilidad */
+.hidden { display: none !important; }
+.main-title {
+    text-align: center;
+    margin: 30px 0;
+    font-size: 2.5rem;
+    color: #fff;
+    text-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+}
+
+/* =========================================
+   2. HOME: GRILLA DE MATERIAS (ESTILO ROBLOX)
+   ========================================= */
 .grid-subjects {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 20px;
+    /* Ajuste automático de columnas (mínimo 160px) */
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 25px;
     padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
+/* Estilo Base de la Tarjeta */
 .subject-card {
-    background: var(--roblox-blue);
-    border-radius: 15px;
-    height: 200px;
+    border-radius: 20px;
+    height: 220px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center; /* Centrado total */
     color: white;
     font-weight: bold;
     text-transform: uppercase;
-    border-bottom: 8px solid var(--shadow);
+    font-size: 1.2rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    
+    /* Efecto 3D de base (Borde inferior grueso) */
+    border-bottom: 10px solid rgba(0,0,0, var(--roblox-shadow-opacity));
+    
     cursor: pointer;
-    transition: transform 0.1s;
-    background-size: cover;
-    background-position: center;
+    transition: all 0.1s ease-in-out; /* Animación rápida al click */
+    position: relative;
+    overflow: hidden;
 }
 
+/* Efecto visual al presionar (Se "hunde") */
 .subject-card:active {
-    transform: translateY(4px);
-    border-bottom-width: 2px;
+    transform: translateY(var(--roblox-press-depth));
+    border-bottom-width: 4px; /* El borde se achica */
 }
 
-.hidden { display: none !important; }
+/* Pseudo-elemento para el emoji gigante de fondo */
+.subject-card::before {
+    content: '';
+    position: absolute;
+    font-size: 8rem; /* Emoji muy grande */
+    opacity: 0.15; /* Transparente para no distraer */
+    bottom: -20px;
+    right: -20px;
+    transform: rotate(-15deg);
+    z-index: 1;
+}
 
-/* Estilo Folder */
-.folder-icon {
-    background: #FFD54F;
+/* Contenedor del texto dentro de la tarjeta */
+.subject-label {
+    background: rgba(0,0,0,0.3);
+    padding: 8px 18px;
+    border-radius: 12px;
+    z-index: 2; /* Por encima del emoji de fondo */
+    margin-top: auto; /* Empuja hacia abajo */
+    margin-bottom: 20px;
+}
+
+/* =========================================
+   3. COLORES Y EMOJIS ESPECÍFICOS (CÓDIGO)
+   ========================================= */
+
+/* Histoire (Ladrillo/Naranja) */
+.card-histoire {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+}
+.card-histoire::before { content: '🏰'; }
+
+/* Français (Azul Francia) */
+.card-francais {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+.card-francais::before { content: '📖'; }
+
+/* Espagnol (Rojo Intenso) */
+.card-espagnol {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+.card-espagnol::before { content: '💃'; }
+
+/* Anglais (Púrpura) */
+.card-anglais {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+.card-anglais::before { content: '💂'; }
+
+/* Allemand (Amarillo Oro) */
+.card-allemand {
+    background: linear-gradient(135deg, #f1c40f, #f39c12);
+}
+.card-allemand::before { content: '🥨'; }
+
+/* Physique (Verde Ciencia) */
+.card-physique {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+.card-physique::before { content: '🧪'; }
+
+/* =========================================
+   4. VISTA DE MATERIA Y ACTIVIDADES
+   ========================================= */
+#subject-view, #admin-panel {
+    max-width: 800px;
+    margin: 20px auto;
     padding: 20px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.folder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Estilo Carpeta Temática */
+.folder-icon {
+    background: #FFD54F; /* Color Folder clásico */
+    padding: 15px;
     border-radius: 10px;
     text-align: center;
-    box-shadow: 4px 4px 0px #FFA000;
+    font-weight: bold;
+    color: #795548;
+    cursor: pointer;
+    box-shadow: 4px 4px 0px #FFA000; /* Efecto 3D simple */
+    transition: transform 0.1s;
+}
+
+.folder-icon:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #FFA000;
+}
+
+/* Contenedor del Iframe (Wordwall) */
+.activity-container {
+    position: relative;
+    width: 100%;
+    /* Truco CSS para mantener aspect ratio del iframe (ej: 16:9) */
+    padding-bottom: 75%; /* Ajusta según Wordwall, 75% es 4:3 */
+    height: 0;
+    overflow: hidden;
+    margin-top: 20px;
+    border-radius: 10px;
+    border: 4px solid #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.activity-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* =========================================
+   5. BOTONES GENERALES UI
+   ========================================= */
+.back-btn {
+    background: #95a5a6;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    margin-bottom: 15px;
+}
+
+/* Botón "J'ai fini !" Gigante (TDA Focus) */
+.finish-btn {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 25px auto;
+    background: var(--success-green);
+    color: white;
+    border: none;
+    padding: 15px;
+    font-size: 1.4rem;
+    font-weight: bold;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: 0 8px 0px #27ae60;
+    transition: all 0.1s;
+}
+
+.finish-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 4px 0px #27ae60;
+}
+
+/* =========================================
+   6. PANEL ADMINISTRADOR Y FORMULARIOS
+   ========================================= */
+#admin-access {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.3; /* Discreto */
+    z-index: 100;
+}
+#admin-access:hover { opacity: 1; }
+
+.admin-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.admin-controls input, 
+.admin-controls select, 
+.admin-controls textarea {
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.admin-controls textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.save-btn {
+    background: var(--admin-purple);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.save-btn:hover { background: #8e44ad; }
+
+/* Tabla de Reportes en Admin */
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    font-size: 0.9rem;
+}
+
+.report-table th, .report-table td {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.report-table th {
+    background-color: #f8f9fa;
+    color: var(--text-color);
+}
+
+/* =========================================
+   7. MODAL DE NOTA FINAL
+   ========================================= */
+#finish-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7); /* Fondo oscuro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    animation: popIn 0.3s ease-out;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.modal-content h3 { font-size: 1.8rem; margin-bottom: 10px; color: var(--success-green); }
+.modal-content p { margin-bottom: 20px; font-size: 1.1rem; }
+
+.modal-content input[type="number"] {
+    width: 80px;
+    font-size: 2rem;
+    text-align: center;
+    padding: 10px;
+    border: 3px solid var(--success-green);
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.modal-content button {
+    background: var(--success-green);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
 }
