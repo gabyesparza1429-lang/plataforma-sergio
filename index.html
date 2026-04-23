@@ -7,23 +7,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .view { display: none; width: 100%; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-        .view.active { display: block; }
-        .locked { filter: grayscale(1); opacity: 0.5; pointer-events: none !important; cursor: not-allowed; }
-        .hidden { display: none !important; }
-    </style>
 </head>
 <body>
 
-    <div id="admin-trigger" onclick="showLogin()">⚙️</div>
+    <div id="admin-trigger" onclick="showLogin()" style="position: fixed; bottom: 20px; right: 20px; font-size: 30px; cursor: pointer; z-index: 9999; background: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">⚙️</div>
 
     <section id="view-login" class="view">
-        <div class="admin-card" style="max-width: 300px; margin: 100px auto; text-align: center;">
-            <h3>Accès Gaby</h3>
-            <input type="password" id="admin-pass-input" placeholder="Mot de passe" style="width:100%; margin-bottom:10px; padding:10px;">
+        <div class="modal-content" style="margin: 100px auto;">
+            <h3>Accès Gaby 👩‍🏫</h3>
+            <input type="password" id="admin-pass-input" placeholder="Mot de passe" style="padding:10px; width:80%; margin-bottom:10px;">
+            <br>
             <button class="btn-save" onclick="checkAdminPassword()">Entrer</button>
-            <button class="btn-nav" onclick="goToHome()" style="margin-top:10px;">Annuler</button>
+            <button class="btn-nav" onclick="goToHome()">Annuler</button>
         </div>
     </section>
 
@@ -42,7 +37,6 @@
             <h2 id="current-subject-title">MATIÈRE</h2>
         </div>
         <div class="chart-container">
-            <h3>📊 Ton niveau actuel</h3>
             <canvas id="progressionChart"></canvas>
             <div id="achievement-info" class="achievement-box"></div>
         </div>
@@ -51,7 +45,7 @@
 
     <section id="view-theme-path" class="view">
         <div class="header-nav">
-            <button class="btn-nav" onclick="goToSubject()">⬅ Retour aux thèmes</button>
+            <button class="btn-nav" onclick="goToSubject()">⬅ Retour</button>
             <h2 id="path-theme-title">TEMA</h2>
         </div>
         <div id="path-buttons-container" class="grid-subjects" style="margin-top:40px;"></div>
@@ -71,7 +65,6 @@
             <h2>Configuration Gaby</h2>
         </div>
         <div class="admin-card">
-            <h3>➕ Créer un nouveau thème</h3>
             <select id="adm-materia">
                 <option value="histoire">Histoire</option>
                 <option value="francais">Français</option>
@@ -82,33 +75,23 @@
                 <option value="musique">Musique</option>
             </select>
             <input type="text" id="adm-tema-name" placeholder="Nom du thème">
-            <hr>
-            <p>Remplis les étapes :</p>
-            <textarea id="adm-ppt" placeholder="Step 1: Link de PowerPoint (Embed)"></textarea>
-            <textarea id="adm-iframe" placeholder="Step 2: Code <iframe> Wordwall"></textarea>
-            <input type="text" id="adm-url" placeholder="Step 3: Link de URL externo">
-            <input type="text" id="adm-video" placeholder="Step 4: Link de Video (YouTube)">
-            <button class="btn-save" onclick="saveNewTheme()">Sauvegarder</button>
+            <textarea id="adm-ppt" placeholder="1. PowerPoint Link/Embed"></textarea>
+            <textarea id="adm-iframe" placeholder="2. Wordwall Iframe"></textarea>
+            <input type="text" id="adm-url" placeholder="3. URL externa">
+            <input type="text" id="adm-video" placeholder="4. YouTube Link">
+            <button class="btn-save" onclick="saveNewTheme()">Sauvegarder le thème</button>
         </div>
-        
-        <div class="admin-card" style="margin-top:20px;">
-            <h3>📚 Banco de Preguntas (PDF)</h3>
-            <input type="file" id="pdf-upload" accept="application/pdf">
-            <button class="btn-save" style="background:#9b59b6;" onclick="processPDF()">Extraer</button>
-        </div>
-
-        <div class="admin-card" style="margin-top:20px;">
-            <h3>📌 Rappel</h3>
-            <input type="text" id="rem-text" placeholder="Message">
+        <div class="admin-card" style="margin-top:10px;">
+            <input type="text" id="rem-text" placeholder="Recordatorio">
             <input type="date" id="rem-date">
-            <button class="btn-save" style="background:#e67e22;" onclick="saveReminder()">Ajouter</button>
+            <button class="btn-save" style="background:#e67e22;" onclick="saveReminder()">Ajouter Rappel</button>
         </div>
     </section>
 
     <div id="modal-score" class="modal hidden">
         <div class="modal-content">
-            <h3>Bien joué !</h3>
-            <p>Note Wordwall (1-20) :</p>
+            <h3>Bien joué Sergio ! 🎉</h3>
+            <p>Note obtenue (1-20):</p>
             <input type="number" id="input-note" min="1" max="20" value="20">
             <button class="btn-save" onclick="saveStepScore()">Valider</button>
         </div>
