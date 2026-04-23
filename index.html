@@ -3,27 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sergio's World</title>
+    <title>Sergio's Learning World</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilo de emergencia para que no se amontone todo */
+        .view { display: none; }
+        .view.active { display: block; }
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
 
     <div id="admin-trigger" onclick="showLogin()">⚙️</div>
 
-    <section id="view-login" class="view hidden">
-        <div class="modal-content">
-            <h3>Accès Administrateur</h3>
+    <section id="view-login" class="view">
+        <div class="login-box">
+            <h3>Accès Gaby</h3>
             <input type="password" id="admin-pass-input" placeholder="Mot de passe">
             <button class="btn-save" onclick="checkAdminPassword()">Entrer</button>
             <button class="btn-nav" onclick="goToHome()">Annuler</button>
         </div>
     </section>
 
-    <main id="view-home" class="view">
+    <main id="view-home" class="view active">
         <h1 class="main-title">Salut, Sergio ! 👋</h1>
         
         <div id="reminders-section" class="reminders-container">
-            <h3>📌 Rappels (Pendientes)</h3>
+            <h3>📌 À faire (Pendientes)</h3>
             <div id="reminders-list"></div>
         </div>
 
@@ -31,7 +37,7 @@
             </div>
     </main>
 
-    <section id="view-subject" class="view hidden">
+    <section id="view-subject" class="view">
         <div class="header-nav">
             <button class="btn-nav" onclick="goToHome()">⬅ Retour</button>
             <h2 id="current-subject-title">MATIÈRE</h2>
@@ -39,7 +45,7 @@
         <div id="folders-container" class="folder-grid"></div>
     </section>
 
-    <section id="view-activity" class="view hidden">
+    <section id="view-activity" class="view">
         <div class="header-nav">
             <button class="btn-nav" onclick="goToSubject()">⬅ Retour</button>
         </div>
@@ -47,10 +53,10 @@
         <button class="btn-finish" onclick="openFinishModal()">J'AI FINI ! 🌟</button>
     </section>
 
-    <section id="view-admin" class="view hidden">
+    <section id="view-admin" class="view">
         <div class="header-nav">
             <button class="btn-nav" onclick="goToHome()">Quitter</button>
-            <h2>Panel de Gaby</h2>
+            <h2>Panel de Gaby 👩‍🏫</h2>
         </div>
         
         <div class="admin-card">
@@ -64,13 +70,13 @@
                 <option value="physique">Physique</option>
             </select>
             <input type="text" id="adm-tema" placeholder="Nom du thème">
-            <textarea id="adm-code" placeholder="Code <iframe> Wordwall"></textarea>
+            <textarea id="adm-code" placeholder="Pega aquí el <iframe> de Wordwall"></textarea>
             <button class="btn-save" onclick="saveData()">Sauvegarder</button>
         </div>
 
         <div class="admin-card" style="margin-top:20px;">
             <h3>Ajouter Rappel</h3>
-            <input type="text" id="rem-text" placeholder="Devoirs ou message">
+            <input type="text" id="rem-text" placeholder="Tarea o aviso">
             <input type="date" id="rem-date">
             <button class="btn-save" style="background:#e67e22;" onclick="saveReminder()">Ajouter</button>
         </div>
@@ -78,8 +84,8 @@
 
     <div id="modal-score" class="modal hidden">
         <div class="modal-content">
-            <h3>Félicitations !</h3>
-            <p>Note obtenue (0-20) :</p>
+            <h3>Super, Sergio !</h3>
+            <p>Quelle note as-tu eue ? (0-20)</p>
             <input type="number" id="input-note" min="0" max="20" value="20">
             <button class="btn-save" onclick="saveFinalScore()">Valider</button>
         </div>
