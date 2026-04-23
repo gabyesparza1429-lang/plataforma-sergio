@@ -3,38 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sergio's World</title>
-    <link rel="stylesheet" href="style.css"> 
+    <title>Sergio's Learning World</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 </head>
 <body>
+
     <div id="admin-access" onclick="openAdmin()">⚙️</div>
 
     <main id="home-screen">
-        <h1 class="main-title">Salut, Sergio !</h1>
-        <div class="grid-subjects" id="subjects-grid"></div>
+        <h1 class="main-title">Salut, Sergio ! 👋</h1>
+        <div class="grid-subjects" id="subjects-grid">
+            </div>
     </main>
 
-    <script src="script.js"></script>
-</body>
-
-
-    <div id="admin-access" onclick="openAdmin()">⚙️</div>
-
-    <main id="home-screen">
-    <h1 class="main-title">Salut, Sergio !</h1>
-    <div class="grid-subjects" id="subjects-grid"></div>
-</main>
-
     <section id="subject-view" class="hidden">
-        <button class="back-btn" onclick="showHome()">⬅ Retour</button>
-        <h2 id="current-subject-title">Matière</h2>
+        <div class="header-view">
+            <button class="back-btn" onclick="showHome()">⬅ Retour</button>
+            <h2 id="current-subject-title">Matière</h2>
+        </div>
         <div id="folders-container" class="folder-grid"></div>
     </section>
 
     <section id="admin-panel" class="hidden">
-        <button class="back-btn" onclick="showHome()">Cerrar</button>
-        <h2>Panel de Control (Gaby)</h2>
-        <div class="admin-controls">
+        <div class="header-view">
+            <button class="back-btn" onclick="showHome()">Quitter</button>
+            <h2>Panel de Gaby 👩‍🏫</h2>
+        </div>
+        
+        <div class="admin-box">
+            <h3>Subir Nueva Actividad</h3>
             <select id="materia-select">
                 <option value="histoire">Histoire</option>
                 <option value="francais">Français</option>
@@ -43,18 +41,26 @@
                 <option value="allemand">Allemand</option>
                 <option value="physique">Physique</option>
             </select>
-            <input type="text" id="folder-name" placeholder="Nombre del Tema (Carpeta)">
-            <textarea id="iframe-code" placeholder="Pega aquí el código <iframe>"></textarea>
-            <button class="save-btn" onclick="saveContent()">Subir Actividad</button>
+            <input type="text" id="folder-name" placeholder="Nombre del Tema (ej: La Revolución)">
+            <textarea id="iframe-code" placeholder="Pega el código <iframe> aquí"></textarea>
+            <button class="save-btn" onclick="saveContent()">Guardar Actividad</button>
+        </div>
+
+        <div class="admin-box" style="margin-top:20px;">
+            <h3>Generador de Examen (PDF)</h3>
+            <input type="file" id="pdf-upload" accept="application/pdf">
+            <button class="save-btn" style="background:#9b59b6;" onclick="processPDF()">Crear Examen desde PDF</button>
+            <p id="pdf-status"></p>
         </div>
     </section>
 
     <div id="finish-modal" class="hidden">
         <div class="modal-content">
-            <h3>Félicitations ! 🎉</h3>
-            <p>Quelle note as-tu obtenue ?</p>
-            <input type="number" id="final-note" min="0" max="20" placeholder="Ej: 18">
-            <button onclick="submitScore()">Enregistrer</button>
+            <h3>Super, Sergio ! 🎉</h3>
+            <p>Quelle note as-tu obtenue sur Wordwall ?</p>
+            <input type="number" id="final-note" min="0" max="20" value="20">
+            <p style="font-size: 0.8rem;">(Note sur 20)</p>
+            <button onclick="submitScore()">Enregistrer ma note</button>
         </div>
     </div>
 
