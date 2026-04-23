@@ -3,37 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sergio's Learning World</title>
+    <title>Sergio's World</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 </head>
 <body>
 
-    <div id="admin-access" onclick="openAdmin()" style="cursor: pointer; position: fixed; bottom: 10px; right: 10px; font-size: 20px; opacity: 0.5; z-index: 9999;">⚙️</div>
+    <div id="admin-trigger" onclick="showLogin()">⚙️</div>
+
+    <section id="view-login" class="view hidden">
+        <div class="modal-content">
+            <h3>Accès Administrateur</h3>
+            <input type="password" id="admin-pass-input" placeholder="Mot de passe">
+            <button class="btn-save" onclick="checkAdminPassword()">Entrer</button>
+            <button class="btn-nav" onclick="goToHome()">Annuler</button>
+        </div>
+    </section>
 
     <main id="view-home" class="view">
         <h1 class="main-title">Salut, Sergio ! 👋</h1>
         
         <div id="reminders-section" class="reminders-container">
-            <h3>📌 À faire (Pendientes)</h3>
-            <div id="reminders-list">
-                </div>
+            <h3>📌 Rappels (Pendientes)</h3>
+            <div id="reminders-list"></div>
         </div>
 
-        <div class="grid-subjects" id="subjects-grid"></div>
+        <div class="grid-subjects" id="subjects-grid">
+            </div>
     </main>
 
     <section id="view-subject" class="view hidden">
         <div class="header-nav">
-            <button class="btn-nav" onclick="showView('view-home')">⬅ Retour</button>
-            <h2 id="current-subject-title">Matière</h2>
+            <button class="btn-nav" onclick="goToHome()">⬅ Retour</button>
+            <h2 id="current-subject-title">MATIÈRE</h2>
         </div>
         <div id="folders-container" class="folder-grid"></div>
     </section>
 
     <section id="view-activity" class="view hidden">
         <div class="header-nav">
-            <button class="btn-nav" onclick="showView('view-subject')">⬅ Retour</button>
+            <button class="btn-nav" onclick="goToSubject()">⬅ Retour</button>
         </div>
         <div id="activity-place" class="iframe-wrapper"></div>
         <button class="btn-finish" onclick="openFinishModal()">J'AI FINI ! 🌟</button>
@@ -41,12 +49,12 @@
 
     <section id="view-admin" class="view hidden">
         <div class="header-nav">
-            <button class="btn-nav" onclick="showView('view-home')">Fermer</button>
-            <h2>Configuration Gaby</h2>
+            <button class="btn-nav" onclick="goToHome()">Quitter</button>
+            <h2>Panel de Gaby</h2>
         </div>
         
         <div class="admin-card">
-            <h3>📖 Ajouter une activité</h3>
+            <h3>Ajouter Activité</h3>
             <select id="adm-materia">
                 <option value="histoire">Histoire</option>
                 <option value="francais">Français</option>
@@ -56,22 +64,22 @@
                 <option value="physique">Physique</option>
             </select>
             <input type="text" id="adm-tema" placeholder="Nom du thème">
-            <textarea id="adm-code" placeholder="Code <iframe> de Wordwall"></textarea>
-            <button class="btn-save" onclick="saveData()">Sauvegarder Actividad</button>
+            <textarea id="adm-code" placeholder="Code <iframe> Wordwall"></textarea>
+            <button class="btn-save" onclick="saveData()">Sauvegarder</button>
         </div>
 
-        <div class="admin-card" style="margin-top: 20px;">
-            <h3>📌 Ajouter un Rappel (Recordatorio)</h3>
-            <input type="text" id="rem-text" placeholder="¿Qué debe hacer Sergio?">
+        <div class="admin-card" style="margin-top:20px;">
+            <h3>Ajouter Rappel</h3>
+            <input type="text" id="rem-text" placeholder="Devoirs ou message">
             <input type="date" id="rem-date">
-            <button class="btn-save" style="background: #e67e22;" onclick="saveReminder()">Ajouter Rappel</button>
+            <button class="btn-save" style="background:#e67e22;" onclick="saveReminder()">Ajouter</button>
         </div>
     </section>
 
     <div id="modal-score" class="modal hidden">
         <div class="modal-content">
-            <h3>Bien joué ! 🎉</h3>
-            <p>Quelle note as-tu eue ? (0-20)</p>
+            <h3>Félicitations !</h3>
+            <p>Note obtenue (0-20) :</p>
             <input type="number" id="input-note" min="0" max="20" value="20">
             <button class="btn-save" onclick="saveFinalScore()">Valider</button>
         </div>
