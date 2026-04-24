@@ -86,54 +86,108 @@ body {
 /* ESTADOS BLOQUEADOS */
 .locked { filter: grayscale(1); opacity: 0.4; pointer-events: none !important; }
 
-/* PANEL ADMIN Y BOTONES */
+/* =========================================
+   PANEL ADMIN (GABY) - DISEÑO MEJORADO
+   ========================================= */
+
 .admin-card {
     background: white;
-    padding: 30px;
-    border-radius: 30px;
+    padding: 40px;
+    border-radius: 35px;
     max-width: 700px;
     margin: 0 auto;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Separación automática entre todos los elementos */
 }
+
+/* Contenedor de campos para darles aire */
+.admin-card input, 
+.admin-card select, 
+.admin-card textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    box-sizing: border-box; /* Evita que se salgan del cuadro */
+    margin-top: 5px;
+}
+
+.admin-card p {
+    margin: 0;
+    font-weight: bold;
+    color: #4A5568;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+/* BOTONES ESTILO ROBLOX */
 
 .btn-save {
     background: var(--roblox-blue);
     color: white;
     border: none;
-    padding: 15px;
-    border-radius: 15px;
+    padding: 12px 20px;
+    border-radius: 12px;
     font-weight: bold;
     cursor: pointer;
-    font-size: 1.1rem;
+    font-size: 1rem;
     border-bottom: 5px solid #007BBF;
+    transition: 0.1s;
 }
 
+.btn-save:active {
+    transform: translateY(3px);
+    border-bottom-width: 2px;
+}
+
+/* BOTÓN COHETE (CORREGIDO: Ya no es gigante) */
 .btn-rocket {
     background: var(--roblox-green);
     color: white;
     border: none;
-    padding: 20px;
+    padding: 15px 40px;
     border-radius: 20px;
-    font-size: 1.5rem;
+    font-size: 1.3rem; /* Tamaño más equilibrado */
     font-weight: bold;
     cursor: pointer;
-    width: 100%;
-    margin-top: 20px;
+    width: auto;       /* El ancho se ajusta al texto */
+    min-width: 280px;  /* Pero tiene un mínimo para que se vea importante */
+    margin: 20px auto; /* Centrado horizontal con espacio arriba y abajo */
+    display: block;
     border-bottom: 8px solid #00A354;
+    transition: all 0.1s;
 }
 
+.btn-rocket:active {
+    transform: translateY(5px);
+    border-bottom-width: 3px;
+}
+
+/* BOTÓN FINALIZAR (SERGIO) */
 .btn-finish {
     width: 100%;
-    padding: 25px;
+    max-width: 400px;
+    margin: 30px auto;
+    display: block;
+    padding: 20px;
     background: var(--roblox-green);
     color: white;
     border: none;
     border-radius: 25px;
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: bold;
     cursor: pointer;
-    margin-top: 30px;
     box-shadow: 0 10px 0 #00A354;
+    transition: 0.1s;
+}
+
+.btn-finish:active {
+    transform: translateY(6px);
+    box-shadow: 0 4px 0 #00A354;
 }
 
 /* OTROS ELEMENTOS */
@@ -142,7 +196,7 @@ body {
     height: 600px;
     border-radius: 30px;
     border: 8px solid white;
-    box-shadow: 0 10px 20px var(--shadow);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 
 #admin-trigger {
@@ -151,13 +205,19 @@ body {
     right: 25px;
     font-size: 35px;
     background: white;
-    width: 60px;
-    height: 60px;
+    width: 65px;
+    height: 65px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     z-index: 10000;
-    box-shadow: 0 5px 15px var(--shadow);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     cursor: pointer;
+    border: none;
+    transition: transform 0.3s;
+}
+
+#admin-trigger:hover {
+    transform: rotate(90deg);
 }
