@@ -7,13 +7,19 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Bloqueo de seguridad para que no se encimen las pantallas */
+        .view { display: none; width: 100%; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .view.active { display: block !important; }
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
 
     <div id="admin-trigger" onclick="showLogin()">⚙️</div>
 
     <section id="view-login" class="view">
-        <div class="admin-card" style="margin-top: 100px; text-align: center;">
+        <div class="admin-card login-center">
             <h3>Accès Gaby 👩‍🏫</h3>
             <input type="password" id="admin-pass-input" placeholder="Mot de passe">
             <button class="btn-save" onclick="checkAdminPassword()">Entrer</button>
@@ -47,7 +53,8 @@
             <button class="btn-nav" onclick="goToSubject()">⬅ Retour</button>
             <h2 id="path-theme-title">TEMA</h2>
         </div>
-        <div id="path-buttons-container" class="grid-subjects" style="margin-top:40px;"></div>
+        <div id="path-buttons-container" class="grid-subjects" style="margin-top:30px;">
+            </div>
     </section>
 
     <section id="view-activity" class="view">
@@ -55,11 +62,13 @@
             <button class="btn-nav" onclick="goBackToPath()">⬅ Retour</button>
         </div>
         <div id="activity-place" class="iframe-wrapper"></div>
-        <div id="quiz-container" class="hidden" style="background:white; padding:20px; border-radius:20px; margin-top:20px;">
+        
+        <div id="quiz-container" class="hidden quiz-box">
             <h3 id="quiz-question"></h3>
             <input type="text" id="quiz-answer" placeholder="Ta réponse...">
             <button class="btn-save" onclick="checkQuizAnswer()">Vérifier</button>
         </div>
+        
         <button class="btn-finish" id="finish-btn-step" onclick="completeStep()">J'AI FINI ! 🌟</button>
     </section>
 
@@ -68,43 +77,49 @@
             <button class="btn-nav" onclick="goToHome()">Quitter</button>
             <h2>Configuration Gaby</h2>
         </div>
-        
-        <div class="admin-card">
-            <h3>📝 Programmer une Session Complète</h3>
-            <select id="adm-materia">
-                <option value="histoire">Histoire</option>
-                <option value="francais">Français</option>
-                <option value="espagnol">Espagnol</option>
-                <option value="anglais">Anglais</option>
-                <option value="allemand">Allemand</option>
-                <option value="physique">Physique</option>
-                <option value="musique">Musique</option>
-            </select>
-            <input type="text" id="adm-tema-name" placeholder="Nom du thème">
-            
-            <p><strong>Contenu de la leçon :</strong></p>
-            <textarea id="adm-ppt" placeholder="1. PowerPoint Link/Embed"></textarea>
-            <textarea id="adm-iframe" placeholder="2. Wordwall Iframe"></textarea>
-            <input type="text" id="adm-url" placeholder="3. URL externa">
-            <input type="text" id="adm-video" placeholder="4. YouTube Link">
-            
-            <p><strong>Fichier PDF (Générateur d'exercices) :</strong></p>
-            <input type="file" id="adm-pdf" accept="application/pdf">
-            
-            <hr>
-            <p><strong>📌 Rappel (Opcional):</strong></p>
-            <input type="text" id="rem-text" placeholder="Mensaje de recordatorio">
-            <input type="date" id="rem-date">
-
-            <button class="btn-save" style="background:#00E676; font-size:1.4rem;" onclick="saveEverything()">🚀 SAUVEGARDER TOUT</button>
-            <p id="save-status" style="text-align:center; font-weight:bold;"></p>
+        <div class="admin-card master-admin">
+            <h3>📝 Nouvelle Session Complète</h3>
+            <div class="admin-form-grid">
+                <div class="form-group">
+                    <label>Matière:</label>
+                    <select id="adm-materia">
+                        <option value="histoire">Histoire</option>
+                        <option value="francais">Français</option>
+                        <option value="espagnol">Espagnol</option>
+                        <option value="anglais">Anglais</option>
+                        <option value="allemand">Allemand</option>
+                        <option value="physique">Physique</option>
+                        <option value="musique">Musique</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nom du thème:</label>
+                    <input type="text" id="adm-tema-name" placeholder="Ex: Les Volcans">
+                </div>
+                <textarea id="adm-ppt" placeholder="1. PowerPoint Embed Code"></textarea>
+                <textarea id="adm-iframe" placeholder="2. Wordwall Iframe"></textarea>
+                <input type="text" id="adm-url" placeholder="3. Link Web (URL)">
+                <input type="text" id="adm-video" placeholder="4. YouTube Link">
+                <div class="form-group">
+                    <label>Archivo PDF (Ejercicios):</label>
+                    <input type="file" id="adm-pdf" accept="application/pdf">
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label>📌 Rappel (Aviso):</label>
+                    <input type="text" id="rem-text" placeholder="Tarea para Sergio">
+                    <input type="date" id="rem-date">
+                </div>
+            </div>
+            <button class="btn-rocket" onclick="saveEverything()">🚀 SAUVEGARDER TOUT</button>
+            <p id="save-status"></p>
         </div>
     </section>
 
     <div id="modal-score" class="modal hidden">
         <div class="modal-content">
-            <h3>Bien joué Sergio !</h3>
-            <p>Note Wordwall (1-20) :</p>
+            <h3>Excellent Sergio!</h3>
+            <p>Ta note (1-20):</p>
             <input type="number" id="input-note" min="1" max="20" value="20">
             <button class="btn-save" onclick="saveStepScore()">Valider</button>
         </div>
