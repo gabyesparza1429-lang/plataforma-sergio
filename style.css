@@ -78,6 +78,10 @@ body {
 .card-allemand { background: linear-gradient(#FFEB3B, #F9A825); } .card-allemand::before { content: '🥨'; }
 .card-physique { background: linear-gradient(#4CAF50, #2E7D32); } .card-physique::before { content: '🧪'; }
 .card-musique { background: linear-gradient(#E91E63, #AD1457); } .card-musique::before { content: '🎵'; }
+.card-math { background: linear-gradient(#00BCD4, #0097A7); } 
+.card-math::before { content: '📐'; }
+.card-svt { background: linear-gradient(#8BC34A, #689F38); } 
+.card-svt::before { content: '🌿'; }
 
 /* ESTADOS BLOQUEADOS */
 .locked { filter: grayscale(1); opacity: 0.4; pointer-events: none !important; }
