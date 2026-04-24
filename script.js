@@ -1,9 +1,13 @@
-const materias = ['histoire', 'francais', 'espagnol', 'anglais', 'allemand', 'physique', 'musique'];
+// 1. Lista actualizada de materias
+const materias = ['histoire', 'francais', 'espagnol', 'anglais', 'allemand', 'physique', 'musique', 'math', 'svt'];
 let currentSub = '', currentThemeIdx = null, currentStepIdx = 0, myChart = null;
 
 let db = JSON.parse(localStorage.getItem('sergioV7')) || {
-    histoire: [], francais: [], espagnol: [], anglais: [], allemand: [], physique: [], musique: []
+    histoire: [], francais: [], espagnol: [], anglais: [], allemand: [], physique: [], musique: [], math: [], svt: []
 };
+if (!db.math) db.math = [];
+if (!db.svt) db.svt = [];
+
 let scores = JSON.parse(localStorage.getItem('sergioScoresV7')) || {};
 let reminders = JSON.parse(localStorage.getItem('sergioRemindersV7')) || [];
 
