@@ -67,8 +67,9 @@
 
     <section id="view-admin" class="view">
         <div class="header-nav"><button class="btn-nav" onclick="goToHome()">Quitter</button><h2>Configuration Gaby</h2></div>
-        <div class="admin-card master-admin">
-            <h3>🚀 Programmer une Session Complète</h3>
+
+        <div class="admin-card">
+            <h3>📚 Ajouter un Nouveau Thème</h3>
             <div class="admin-form-grid">
                 <select id="adm-materia">
                     <option value="histoire">Histoire</option>
@@ -87,14 +88,25 @@
                 <textarea id="adm-iframe" placeholder="2. Wordwall Iframe"></textarea>
                 <input type="text" id="adm-url" placeholder="3. URL externa">
                 <input type="text" id="adm-video" placeholder="4. YouTube Link">
-                <hr>
-                <p>📌 Rappel & Aviso :</p>
+                <button class="btn-rocket" onclick="saveTheme()">📚 SAUVEGARDER LE THÈME</button>
+            </div>
+        </div>
+
+        <div class="admin-card" style="margin-top:20px;">
+            <h3>📌 Ajouter un Nouveau Rappel</h3>
+            <div class="admin-form-grid">
                 <input type="text" id="rem-text" placeholder="Message de rappel">
                 <input type="date" id="rem-date">
+                <button class="btn-rocket" onclick="saveReminder()">📌 SAUVEGARDER LE RAPPEL</button>
             </div>
-            <button class="btn-rocket" onclick="saveEverything()">🚀 SAUVEGARDER TOUT</button>
-            <p id="save-status" style="text-align:center; font-weight:bold;"></p>
         </div>
+
+        <div class="admin-card" style="margin-top:20px;">
+            <h3>⚙️ Gestion du Contenu</h3>
+            <div id="admin-mgmt-container"></div>
+        </div>
+
+        <p id="save-status" style="text-align:center; font-weight:bold; margin-top:20px;"></p>
     </section>
 
     <div id="modal-score" class="modal hidden">

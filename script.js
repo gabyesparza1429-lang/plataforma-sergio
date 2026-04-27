@@ -89,15 +89,14 @@ function renderReminders() {
     });
 }
 
-// --- 4. GUARDAR TODO EN LA NUBE ---
-function saveEverything() {
+// --- 4. GESTIÓN ADMIN (GUARDAR Y BORRAR) ---
+function saveTheme() {
     const status = document.getElementById('save-status');
-    status.innerText = "⏳ Synchronisation...";
-    
     const mat = document.getElementById('adm-materia').value;
     const name = document.getElementById('adm-tema-name').value;
     if(!name) return alert("Nom du thème !");
 
+    status.innerText = "⏳ Synchronisation...";
     if(!db[mat]) db[mat] = [];
     db[mat].push({
         name,
@@ -108,23 +107,85 @@ function saveEverything() {
         progress: 0
     });
 
-    const rText = document.getElementById('rem-text').value;
-    const rDate = document.getElementById('rem-date').value;
-    if (rText && rDate) reminders.push({ text: rText, date: rDate });
-
-    // ENVIAR A LA NUBE
     database.ref('/').set({ db, scores, reminders }).then(() => {
-        status.innerText = "🚀 SESIÓN GUARDADA EN LA NUBE";
-        // Limpiar formulario
+        status.innerText = "🚀 THÈME ENREGISTRÉ !";
         document.getElementById('adm-tema-name').value = '';
         document.getElementById('adm-ppt').value = '';
         document.getElementById('adm-iframe').value = '';
         document.getElementById('adm-url').value = '';
         document.getElementById('adm-video').value = '';
+        renderAdminManagement();
+        setTimeout(() => { status.innerText = ""; }, 2000);
+    });
+}
+
+function saveReminder() {
+    const status = document.getElementById('save-status');
+    const rText = document.getElementById('rem-text').value;
+    const rDate = document.getElementById('rem-date').value;
+    if (!rText || !rDate) return alert("Texte et date requis !");
+
+    status.innerText = "⏳ Synchronisation...";
+    reminders.push({ text: rText, date: rDate });
+
+    database.ref('/').set({ db, scores, reminders }).then(() => {
+        status.innerText = "🚀 RAPPEL ENREGISTRÉ !";
         document.getElementById('rem-text').value = '';
         document.getElementById('rem-date').value = '';
-        setTimeout(goToHome, 1500);
+        renderAdminManagement();
+        setTimeout(() => { status.innerText = ""; }, 2000);
     });
+}
+
+function renderAdminManagement() {
+    const container = document.getElementById('admin-mgmt-container');
+    if(!container) return;
+    container.innerHTML = "";
+
+    // 1. Mostrar Rappels
+    let remHTML = '<div class="mgmt-section"><h4>📌 Rappels Actuels</h4>';
+    if(reminders.length === 0) remHTML += "<p>Aucun rappel.</p>";
+    reminders.forEach((r, i) => {
+        remHTML += `
+            <div class="mgmt-item">
+                <span>[${r.date}] ${r.text}</span>
+                <button class="btn-delete" onclick="deleteReminder(${i})">Supprimer</button>
+            </div>`;
+    });
+    remHTML += '</div>';
+    container.innerHTML += remHTML;
+
+    // 2. Mostrar Temas por Materia
+    let themesHTML = '<div class="mgmt-section"><h4>📚 Thèmes par Matière</h4>';
+    let hasThemes = false;
+    materias.forEach(m => {
+        if(db[m] && db[m].length > 0) {
+            hasThemes = true;
+            themesHTML += `<div style="margin-top:10px; font-weight:bold; color:#2d3748;">${m.toUpperCase()}</div>`;
+            db[m].forEach((t, i) => {
+                themesHTML += `
+                    <div class="mgmt-item">
+                        <span>${t.name}</span>
+                        <button class="btn-delete" onclick="deleteTheme('${m}', ${i})">Supprimer</button>
+                    </div>`;
+            });
+        }
+    });
+    if(!hasThemes) themesHTML += "<p>Aucun thème.</p>";
+    themesHTML += '</div>';
+    container.innerHTML += themesHTML;
+}
+
+function deleteReminder(idx) {
+    if(!confirm("Supprimer ce rappel ?")) return;
+    reminders.splice(idx, 1);
+    database.ref('/').set({ db, scores, reminders }).then(renderAdminManagement);
+}
+
+function deleteTheme(mat, idx) {
+    if(!confirm("Supprimer ce thème ?")) return;
+    db[mat].splice(idx, 1);
+    database.ref('/').set({ db, scores, reminders }).then(renderAdminManagement);
 }
 
 function openSubject(m) {
@@ -193,7 +254,10 @@ function saveStepScore() {
 
 function showLogin() { showView('view-login'); }
 function checkAdminPassword() {
-    if(document.getElementById('admin-pass-input').value === "Gaby1429") showView('view-admin');
+    if(document.getElementById('admin-pass-input').value === "Gaby1429") {
+        showView('view-admin');
+        renderAdminManagement();
+    }
     else alert("Faux!");
 }
 
