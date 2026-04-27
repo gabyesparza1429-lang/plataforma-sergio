@@ -20,6 +20,7 @@ let currentSub = '', currentThemeIdx = null, currentStepIdx = 0, myChart = null;
 let db = {};
 let scores = {};
 let reminders = [];
+let archivedReminders = [];
 
 // --- 2. ESCUCHAR LA NUBE Y MIGRAR DATOS LOCALES ---
 database.ref('/').on('value', (snapshot) => {
@@ -30,8 +31,15 @@ database.ref('/').on('value', (snapshot) => {
         db = cloudData.db || {};
         scores = cloudData.scores || {};
         reminders = cloudData.reminders || [];
+        archivedReminders = cloudData.archivedReminders || [];
         materias.forEach(m => { if(!db[m]) db[m] = []; });
-        renderHome();
+
+        // Auto-archivar recordatorios vencidos
+        autoArchiveReminders();
+
+        const adminVisible = document.getElementById('view-admin').classList.contains('active');
+        if (!adminVisible) renderHome();
+        else renderAdminManagement();
     } 
     // CASO B: La nube está vacía (Primera vez), migramos tu trabajo previo
     else {
@@ -107,7 +115,7 @@ function saveTheme() {
         progress: 0
     });
 
-    database.ref('/').set({ db, scores, reminders }).then(() => {
+    database.ref('/').set({ db, scores, reminders, archivedReminders }).then(() => {
         status.innerText = "🚀 THÈME ENREGISTRÉ !";
         document.getElementById('adm-tema-name').value = '';
         document.getElementById('adm-ppt').value = '';
@@ -128,7 +136,7 @@ function saveReminder() {
     status.innerText = "⏳ Synchronisation...";
     reminders.push({ text: rText, date: rDate });
 
-    database.ref('/').set({ db, scores, reminders }).then(() => {
+    database.ref('/').set({ db, scores, reminders, archivedReminders }).then(() => {
         status.innerText = "🚀 RAPPEL ENREGISTRÉ !";
         document.getElementById('rem-text').value = '';
         document.getElementById('rem-date').value = '';
@@ -149,7 +157,10 @@ function renderAdminManagement() {
         remHTML += `
             <div class="mgmt-item">
                 <span>[${r.date}] ${r.text}</span>
-                <button class="btn-delete" onclick="deleteReminder(${i})">Supprimer</button>
+                <div>
+                    <button class="btn-nav" style="padding:5px 10px; font-size:0.8rem;" onclick="openEditReminder(${i})">📝</button>
+                    <button class="btn-delete" onclick="deleteReminder(${i})">Supprimer</button>
+                </div>
             </div>`;
     });
     remHTML += '</div>';
@@ -166,7 +177,10 @@ function renderAdminManagement() {
                 themesHTML += `
                     <div class="mgmt-item">
                         <span>${t.name}</span>
-                        <button class="btn-delete" onclick="deleteTheme('${m}', ${i})">Supprimer</button>
+                        <div>
+                            <button class="btn-nav" style="padding:5px 10px; font-size:0.8rem;" onclick="openEditTheme('${m}', ${i})">📝</button>
+                            <button class="btn-delete" onclick="deleteTheme('${m}', ${i})">Supprimer</button>
+                        </div>
                     </div>`;
             });
         }
@@ -174,19 +188,98 @@ function renderAdminManagement() {
     if(!hasThemes) themesHTML += "<p>Aucun thème.</p>";
     themesHTML += '</div>';
     container.innerHTML += themesHTML;
+
+    // 3. Mostrar Archivos (Recordatorios vencidos)
+    let archivesHTML = '<div class="mgmt-section"><h4>📜 Archives (Recordatorios Vencidos)</h4>';
+    if(archivedReminders.length === 0) archivesHTML += "<p>Aucune archive.</p>";
+    archivedReminders.forEach((r, i) => {
+        archivesHTML += `
+            <div class="mgmt-item">
+                <span style="color:#718096;">[${r.date}] ${r.text}</span>
+                <button class="btn-delete" onclick="deleteArchive(${i})">Supprimer</button>
+            </div>`;
+    });
+    archivesHTML += '</div>';
+    container.innerHTML += archivesHTML;
 }
 
 function deleteReminder(idx) {
     if(!confirm("Supprimer ce rappel ?")) return;
     reminders.splice(idx, 1);
-    database.ref('/').set({ db, scores, reminders }).then(renderAdminManagement);
+    database.ref('/').set({ db, scores, reminders, archivedReminders }).then(renderAdminManagement);
 }
 
 function deleteTheme(mat, idx) {
     if(!confirm("Supprimer ce thème ?")) return;
     db[mat].splice(idx, 1);
-    database.ref('/').set({ db, scores, reminders }).then(renderAdminManagement);
+    database.ref('/').set({ db, scores, reminders, archivedReminders }).then(renderAdminManagement);
 }
+
+function deleteArchive(idx) {
+    if(!confirm("Supprimer définitivement ?")) return;
+    archivedReminders.splice(idx, 1);
+    database.ref('/').set({ db, scores, reminders, archivedReminders }).then(renderAdminManagement);
+}
+
+// --- 5. EDICIÓN ---
+let editingType = null, editingKey = null, editingIdx = null;
+
+function openEditReminder(idx) {
+    editingType = 'reminder';
+    editingIdx = idx;
+    const r = reminders[idx];
+    document.getElementById('edit-modal-title').innerText = "Modifier Rappel";
+    const form = document.getElementById('edit-form');
+    form.innerHTML = `
+        <input type="text" id="edit-rem-text">
+        <input type="date" id="edit-rem-date">
+    `;
+    document.getElementById('edit-rem-text').value = r.text;
+    document.getElementById('edit-rem-date').value = r.date;
+    document.getElementById('modal-edit').classList.remove('hidden');
+}
+
+function openEditTheme(mat, idx) {
+    editingType = 'theme';
+    editingKey = mat;
+    editingIdx = idx;
+    const t = db[mat][idx];
+    document.getElementById('edit-modal-title').innerText = "Modifier Thème";
+    const form = document.getElementById('edit-form');
+    form.innerHTML = `
+        <input type="text" id="edit-tema-name">
+        <textarea id="edit-ppt" placeholder="PowerPoint"></textarea>
+        <textarea id="edit-iframe" placeholder="Iframe"></textarea>
+        <input type="text" id="edit-url" placeholder="URL">
+        <input type="text" id="edit-video" placeholder="Video">
+    `;
+    document.getElementById('edit-tema-name').value = t.name;
+    document.getElementById('edit-ppt').value = t.ppt || "";
+    document.getElementById('edit-iframe').value = t.iframe || "";
+    document.getElementById('edit-url').value = t.url || "";
+    document.getElementById('edit-video').value = t.video || "";
+    document.getElementById('modal-edit').classList.remove('hidden');
+}
+
+function saveEdit() {
+    if (editingType === 'reminder') {
+        reminders[editingIdx].text = document.getElementById('edit-rem-text').value;
+        reminders[editingIdx].date = document.getElementById('edit-rem-date').value;
+    } else {
+        const t = db[editingKey][editingIdx];
+        t.name = document.getElementById('edit-tema-name').value;
+        t.ppt = document.getElementById('edit-ppt').value;
+        t.iframe = document.getElementById('edit-iframe').value;
+        t.url = document.getElementById('edit-url').value;
+        t.video = document.getElementById('edit-video').value;
+    }
+    database.ref('/').set({ db, scores, reminders, archivedReminders }).then(() => {
+        closeEditModal();
+        renderAdminManagement();
+    });
+}
+
+function closeEditModal() { document.getElementById('modal-edit').classList.add('hidden'); }
 
 function openSubject(m) {
     currentSub = m;
@@ -239,7 +332,7 @@ function launchStep(s) {
 function completeStep() {
     const theme = db[currentSub][currentThemeIdx];
     if(currentStepIdx === 1) document.getElementById('modal-score').classList.remove('hidden');
-    else { theme.progress = (theme.progress || 0) + 1; database.ref('/').set({ db, scores, reminders }); }
+    else { theme.progress = (theme.progress || 0) + 1; database.ref('/').set({ db, scores, reminders, archivedReminders }); }
 }
 
 function saveStepScore() {
@@ -247,12 +340,15 @@ function saveStepScore() {
     if(!scores[currentSub]) scores[currentSub] = [];
     scores[currentSub].push(n);
     db[currentSub][currentThemeIdx].progress++;
-    database.ref('/').set({ db, scores, reminders });
+    database.ref('/').set({ db, scores, reminders, archivedReminders });
     document.getElementById('modal-score').classList.add('hidden');
     openThemePath(currentThemeIdx);
 }
 
-function showLogin() { showView('view-login'); }
+function showLogin() {
+    console.log("Showing login...");
+    showView('view-login');
+}
 function checkAdminPassword() {
     if(document.getElementById('admin-pass-input').value === "Gaby1429") {
         showView('view-admin');
@@ -270,6 +366,26 @@ function renderChart(m) {
         data: { labels: h.map((_,i)=>`Ex ${i+1}`), datasets: [{ label: '1-20', data: h, backgroundColor: '#E91E63' }] },
         options: { scales: { y: { min:0, max:20 } } }
     });
+}
+
+function autoArchiveReminders() {
+    const today = new Date().toISOString().split('T')[0];
+    let changed = false;
+
+    const active = [];
+    reminders.forEach(r => {
+        if (r.date < today) {
+            archivedReminders.push(r);
+            changed = true;
+        } else {
+            active.push(r);
+        }
+    });
+
+    if (changed) {
+        reminders = active;
+        database.ref('/').set({ db, scores, reminders, archivedReminders });
+    }
 }
 
 window.onload = renderHome;
