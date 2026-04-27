@@ -1,4 +1,4 @@
-// --- 1. CONFIGURACIÓN FIREBASE (Tus llaves personales) ---
+// --- 1. CONFIGURACIÓN FIREBASE ---
 const firebaseConfig = {
   apiKey: "AIzaSyA_KoTX8rvDrsU7qEEfturgiPhkseQN4i4",
   authDomain: "sergiolearning-21620.firebaseapp.com",
@@ -9,113 +9,128 @@ const firebaseConfig = {
   appId: "1:363094807638:web:5ea9b50c18593998297f7"
 };
 
-// Inicializar la nube
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
 const materias = ['histoire', 'francais', 'espagnol', 'anglais', 'allemand', 'physique', 'musique', 'math', 'svt'];
 let currentSub = '', currentThemeIdx = null, currentStepIdx = 0, myChart = null;
-
-// Estas variables se llenan desde la nube
 let db = {};
 let scores = {};
 let reminders = [];
 
-// --- 2. ESCUCHAR LA NUBE Y MIGRAR DATOS LOCALES ---
 database.ref('/').on('value', (snapshot) => {
     const cloudData = snapshot.val();
-    
-    // CASO A: Ya hay datos en la nube, los usamos
-    if (cloudData) {
+    if(cloudData) {
         db = cloudData.db || {};
         scores = cloudData.scores || {};
         reminders = cloudData.reminders || [];
-        materias.forEach(m => { if(!db[m]) db[m] = []; });
-        renderHome();
-    } 
-    // CASO B: La nube está vacía (Primera vez), migramos tu trabajo previo
-    else {
-        console.log("Nube vacía. Buscando trabajo previo en esta computadora...");
-        const localData = JSON.parse(localStorage.getItem('sergioV7')); 
-        const localScores = JSON.parse(localStorage.getItem('sergioScoresV7'));
-        const localReminders = JSON.parse(localStorage.getItem('sergioRemindersV7'));
-
-        if (localData) {
-            alert("MIGRACIÓN: Subiendo tu trabajo previo a la nube...");
-            database.ref('/').set({
-                db: localData,
-                scores: localScores || {},
-                reminders: localReminders || []
-            });
-        } else {
-            // Si es una compu nueva sin nada
-            materias.forEach(m => { if(!db[m]) db[m] = []; });
-            renderHome();
-        }
+        renderReminders();
     }
 });
 
-// --- 3. FUNCIONES DE NAVEGACIÓN ---
-function showView(viewId) {
+function showView(id) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById(viewId).classList.add('active');
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
 }
 
-function goToHome() { showView('view-home'); renderHome(); }
-function goToSubject() { showView('view-subject'); }
-function goBackToPath() { showView('view-theme-path'); }
+function openSubject(m) {
+    currentSub = m;
+    showView('view-themes');
+    document.getElementById('theme-title').innerText = m.toUpperCase();
+    renderThemes();
+    renderChart(m);
+}
 
-function renderHome() {
-    const grid = document.getElementById('subjects-grid');
-    if(!grid) return;
-    grid.innerHTML = '';
-    materias.forEach(m => {
+function renderThemes() {
+    const container = document.getElementById('themes-container');
+    container.innerHTML = '';
+    const themes = db[currentSub] || [];
+    themes.forEach((t, index) => {
         const card = document.createElement('div');
-        card.className = `subject-card card-${m}`;
-        card.innerHTML = `<span class="subject-label">${m}</span>`;
-        card.onclick = () => openSubject(m);
-        grid.appendChild(card);
+        card.className = 'theme-card';
+        card.onclick = () => openThemePath(index);
+        card.innerHTML = `
+            <div class="theme-icon">📂</div>
+            <div class="theme-info">
+                <h3>${t.name}</h3>
+                <div class="progress-bar"><div class="progress-fill" style="width:${(t.progress/4)*100}%"></div></div>
+            </div>
+        `;
+        container.appendChild(card);
     });
-    renderReminders();
 }
 
 function renderReminders() {
-    const list = document.getElementById('reminders-list');
-    const today = new Date().toISOString().split('T')[0];
-    const active = (reminders || []).filter(r => r.date >= today);
-    list.innerHTML = active.length ? '' : "<p>Tout est à jour ! 👍</p>";
-    active.forEach(r => {
-        list.innerHTML += `<div style="background:#fff5e6; padding:15px; border-radius:15px; margin-bottom:10px; border-left:8px solid #e67e22; font-weight:bold;">🗓 ${r.date}: ${r.text}</div>`;
+    const container = document.getElementById('reminders-list');
+    if(!container) return;
+    container.innerHTML = '';
+    reminders.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'reminder-item';
+        div.innerHTML = `<strong>${r.date}</strong>: ${r.text}`;
+        container.appendChild(div);
     });
 }
 
-// --- 4. GUARDAR TODO EN LA NUBE ---
+function openThemePath(idx) {
+    currentThemeIdx = idx;
+    const t = db[currentSub][idx];
+    showView('view-path');
+    document.getElementById('path-title').innerText = t.name;
+    const steps = [
+        { name: 'Leçon PPT', icon: '📄', data: t.ppt },
+        { name: 'Wordwall', icon: '🎮', data: t.iframe },
+        { name: 'Fiche', icon: '🔗', data: t.url },
+        { name: 'Vidéo', icon: '📺', data: t.video }
+    ];
+    const container = document.getElementById('path-container');
+    container.innerHTML = '';
+    steps.forEach((s, i) => {
+        const stepDiv = document.createElement('div');
+        stepDiv.className = `path-step ${i < t.progress ? 'completed' : (i === t.progress ? 'current' : 'locked')}`;
+        stepDiv.onclick = () => { if(i <= t.progress) { currentStepIdx = i; launchStep(s); } };
+        stepDiv.innerHTML = `<div class="step-icon">${s.icon}</div><p>${s.name}</p>`;
+        container.appendChild(stepDiv);
+    });
+}
+
+// --- 4. GUARDAR TODO (CORREGIDO: TEMA OPCIONAL) ---
 function saveEverything() {
     const status = document.getElementById('save-status');
     status.innerText = "⏳ Synchronisation...";
-    
     const mat = document.getElementById('adm-materia').value;
     const name = document.getElementById('adm-tema-name').value;
-    if(!name) return alert("Nom du thème !");
-
-    if(!db[mat]) db[mat] = [];
-    db[mat].push({
-        name,
-        ppt: document.getElementById('adm-ppt').value,
-        iframe: document.getElementById('adm-iframe').value,
-        url: document.getElementById('adm-url').value,
-        video: document.getElementById('adm-video').value,
-        progress: 0
-    });
-
     const rText = document.getElementById('rem-text').value;
     const rDate = document.getElementById('rem-date').value;
-    if (rText && rDate) reminders.push({ text: rText, date: rDate });
+    let hayCambios = false;
 
-    // ENVIAR A LA NUBE
+    if (name.trim() !== "") {
+        if (!db[mat]) db[mat] = [];
+        db[mat].push({
+            name: name,
+            ppt: document.getElementById('adm-ppt').value,
+            iframe: document.getElementById('adm-iframe').value,
+            url: document.getElementById('adm-url').value,
+            video: document.getElementById('adm-video').value,
+            progress: 0
+        });
+        hayCambios = true;
+    }
+
+    if (rText && rDate) {
+        if (!reminders) reminders = [];
+        reminders.push({ text: rText, date: rDate });
+        hayCambios = true;
+    }
+
+    if (!hayCambios) {
+        status.innerText = "❌ Rien à sauvegarder.";
+        return;
+    }
+
     database.ref('/').set({ db, scores, reminders }).then(() => {
-        status.innerText = "🚀 SESIÓN GUARDADA EN LA NUBE";
-        // Limpiar formulario
+        status.innerText = "🚀 DONNÉES MISES À JOUR !";
         document.getElementById('adm-tema-name').value = '';
         document.getElementById('adm-ppt').value = '';
         document.getElementById('adm-iframe').value = '';
@@ -123,51 +138,41 @@ function saveEverything() {
         document.getElementById('adm-video').value = '';
         document.getElementById('rem-text').value = '';
         document.getElementById('rem-date').value = '';
-        setTimeout(goToHome, 1500);
+        setTimeout(() => { 
+            status.innerText = ""; 
+            renderAdminThemes(); 
+        }, 2000);
     });
 }
 
-function openSubject(m) {
-    currentSub = m;
-    showView('view-subject');
-    document.getElementById('current-subject-title').innerText = m.toUpperCase();
-    const container = document.getElementById('folders-container');
-    container.innerHTML = '';
-    (db[m] || []).forEach((t, i) => {
-        const f = document.createElement('div');
-        f.className = 'subject-card card-musique';
-        f.style.height = "120px";
-        f.innerHTML = `<span class="subject-label">📂 ${t.name}</span>`;
-        f.onclick = () => openThemePath(i);
-        container.appendChild(f);
-    });
-    renderChart(m);
+// --- GESTIÓN DE TEMAS (AGREGAR/ELIMINAR) ---
+function renderAdminThemes() {
+    const container = document.getElementById('admin-themes-list');
+    if (!container) return;
+    const mat = document.getElementById('adm-materia').value;
+    container.innerHTML = `<h4 style="margin-top:0; color:#2c3e50;">Temas en ${mat.toUpperCase()}:</h4>`;
+    if (db[mat] && db[mat].length > 0) {
+        db[mat].forEach((t, i) => {
+            const item = document.createElement('div');
+            item.style = "display:flex; justify-content:space-between; align-items:center; background:white; padding:8px 12px; border-radius:10px; margin-bottom:8px; border:1px solid #ddd; font-size:0.9rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05);";
+            item.innerHTML = `
+                <span>📂 ${t.name}</span>
+                <button onclick="deleteTheme('${mat}', ${i})" style="background:#ff4757; color:white; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">Borrar</button>
+            `;
+            container.appendChild(item);
+        });
+    } else {
+        container.innerHTML += "<p style='font-size:0.8rem; color:gray'>No hay temas creados.</p>";
+    }
 }
 
-function openThemePath(idx) {
-    currentThemeIdx = idx;
-    const theme = db[currentSub][idx];
-    showView('view-theme-path');
-    document.getElementById('path-theme-title').innerText = theme.name;
-    const container = document.getElementById('path-buttons-container');
-    container.innerHTML = '';
-    const steps = [
-        { name: "Présentation", data: theme.ppt, icon: "📽️" },
-        { name: "Actividad", data: theme.iframe, icon: "🎮" },
-        { name: "Web", data: theme.url, icon: "🌐" },
-        { name: "Vidéo", data: theme.video, icon: "📺" },
-        { name: "Examen", data: "EXAM", icon: "🎓" }
-    ].filter(s => s.data);
-
-    steps.forEach((s, i) => {
-        const locked = i > (theme.progress || 0);
-        const b = document.createElement('div');
-        b.className = `subject-card card-musique ${locked ? 'locked' : ''}`;
-        b.style.height = "120px";
-        b.innerHTML = `<span class="subject-label">${s.icon} ${s.name}</span>`;
-        if(!locked) b.onclick = () => { currentStepIdx = i; launchStep(s); };
-        container.appendChild(b);
-    });
+function deleteTheme(mat, index) {
+    if (confirm("¿Seguro que quieres borrar este tema?")) {
+        db[mat].splice(index, 1);
+        database.ref('/').set({ db, scores, reminders }).then(() => {
+            renderAdminThemes();
+        });
+    }
 }
 
 function launchStep(s) {
@@ -193,7 +198,10 @@ function saveStepScore() {
 
 function showLogin() { showView('view-login'); }
 function checkAdminPassword() {
-    if(document.getElementById('admin-pass-input').value === "Gaby1429") showView('view-admin');
+    if(document.getElementById('admin-pass-input').value === "Gaby1429") {
+        showView('view-admin');
+        renderAdminThemes();
+    }
     else alert("Faux!");
 }
 
@@ -203,9 +211,7 @@ function renderChart(m) {
     if(myChart) myChart.destroy();
     myChart = new Chart(ctx, {
         type: 'bar',
-        data: { labels: h.map((_,i)=>`Ex ${i+1}`), datasets: [{ label: '1-20', data: h, backgroundColor: '#E91E63' }] },
-        options: { scales: { y: { min:0, max:20 } } }
+        data: { labels: h.map((_,i)=>`Ex ${i+1}`), datasets: [{ label: 'Note (1-20)', data: h, backgroundColor: '#00A2FF', borderRadius: 10 }] },
+        options: { responsive: true, scales: { y: { min: 0, max: 20 } } }
     });
 }
-
-window.onload = renderHome;
