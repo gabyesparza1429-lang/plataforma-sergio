@@ -112,6 +112,8 @@ function saveTheme() {
         iframe: document.getElementById('adm-iframe').value,
         url: document.getElementById('adm-url').value,
         video: document.getElementById('adm-video').value,
+        pdf: document.getElementById('adm-pdf').value,
+        answers: document.getElementById('adm-answers').value,
         progress: 0
     });
 
@@ -252,12 +254,17 @@ function openEditTheme(mat, idx) {
         <textarea id="edit-iframe" placeholder="Iframe"></textarea>
         <input type="text" id="edit-url" placeholder="URL">
         <input type="text" id="edit-video" placeholder="Video">
+        <p>📝 PDF Autocorrectif :</p>
+        <input type="text" id="edit-pdf" placeholder="URL du PDF">
+        <input type="text" id="edit-answers" placeholder="Réponses (A, B, C)">
     `;
     document.getElementById('edit-tema-name').value = t.name;
     document.getElementById('edit-ppt').value = t.ppt || "";
     document.getElementById('edit-iframe').value = t.iframe || "";
     document.getElementById('edit-url').value = t.url || "";
     document.getElementById('edit-video').value = t.video || "";
+    document.getElementById('edit-pdf').value = t.pdf || "";
+    document.getElementById('edit-answers').value = t.answers || "";
     document.getElementById('modal-edit').classList.remove('hidden');
 }
 
@@ -272,6 +279,8 @@ function saveEdit() {
         t.iframe = document.getElementById('edit-iframe').value;
         t.url = document.getElementById('edit-url').value;
         t.video = document.getElementById('edit-video').value;
+        t.pdf = document.getElementById('edit-pdf').value;
+        t.answers = document.getElementById('edit-answers').value;
     }
     database.ref('/').set({ db, scores, reminders, archivedReminders }).then(() => {
         closeEditModal();
@@ -310,6 +319,7 @@ function openThemePath(idx) {
         { name: "Actividad", data: theme.iframe, icon: "🎮" },
         { name: "Web", data: theme.url, icon: "🌐" },
         { name: "Vidéo", data: theme.video, icon: "📺" },
+        { name: "Quiz PDF", data: theme.pdf, icon: "📝", type: "pdf-quiz" },
         { name: "Examen", data: "EXAM", icon: "🎓" }
     ].filter(s => s.data);
 
@@ -326,7 +336,73 @@ function openThemePath(idx) {
 
 function launchStep(s) {
     showView('view-activity');
-    document.getElementById('activity-place').innerHTML = s.data.includes('<iframe') ? s.data : `<iframe src="${s.data}"></iframe>`;
+    const activityPlace = document.getElementById('activity-place');
+    const quizPlace = document.getElementById('quiz-place');
+    const finishBtn = document.getElementById('btn-finish-activity');
+
+    activityPlace.innerHTML = s.data.includes('<iframe') ? s.data : `<iframe src="${s.data}"></iframe>`;
+
+    if (s.type === "pdf-quiz") {
+        quizPlace.classList.remove('hidden');
+        finishBtn.classList.add('hidden');
+        renderInteractiveQuiz();
+    } else {
+        quizPlace.classList.add('hidden');
+        finishBtn.classList.remove('hidden');
+    }
+}
+
+function renderInteractiveQuiz() {
+    const theme = db[currentSub][currentThemeIdx];
+    const quizQuestions = document.getElementById('quiz-questions');
+    quizQuestions.innerHTML = "";
+
+    // Reset answers
+    for (const prop in userAnswers) { delete userAnswers[prop]; }
+
+    const answers = theme.answers.split(',').map(a => a.trim().toUpperCase());
+    answers.forEach((_, i) => {
+        const row = document.createElement('div');
+        row.className = "quiz-question-row";
+        row.innerHTML = `<p>Question ${i + 1} :</p>
+            <div class="quiz-options" id="q-row-${i}">
+                <div class="quiz-opt" onclick="selectQuizOpt(${i}, 'A')">A</div>
+                <div class="quiz-opt" onclick="selectQuizOpt(${i}, 'B')">B</div>
+                <div class="quiz-opt" onclick="selectQuizOpt(${i}, 'C')">C</div>
+                <div class="quiz-opt" onclick="selectQuizOpt(${i}, 'D')">D</div>
+            </div>`;
+        quizQuestions.appendChild(row);
+    });
+}
+
+const userAnswers = {};
+function selectQuizOpt(qIdx, val) {
+    userAnswers[qIdx] = val;
+    document.querySelectorAll(`#q-row-${qIdx} .quiz-opt`).forEach(opt => {
+        opt.classList.remove('selected');
+        if (opt.innerText === val) opt.classList.add('selected');
+    });
+}
+
+function gradeQuiz() {
+    const theme = db[currentSub][currentThemeIdx];
+    const correctAnswers = theme.answers.split(',').map(a => a.trim().toUpperCase());
+    let correctCount = 0;
+
+    correctAnswers.forEach((ans, i) => {
+        if (userAnswers[i] === ans) correctCount++;
+    });
+
+    const score = Math.round((correctCount / correctAnswers.length) * 20);
+    alert(`Bravo Sergio ! Tu as eu ${correctCount} / ${correctAnswers.length} correct. Note : ${score}/20`);
+
+    // Guardar nota y avanzar
+    if(!scores[currentSub]) scores[currentSub] = [];
+    scores[currentSub].push(score);
+    theme.progress = (theme.progress || 0) + 1;
+    database.ref('/').set({ db, scores, reminders, archivedReminders }).then(() => {
+        openThemePath(currentThemeIdx);
+    });
 }
 
 function completeStep() {
