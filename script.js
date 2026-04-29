@@ -14,7 +14,7 @@ firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
 const materias = ['histoire', 'francais', 'espagnol', 'anglais', 'allemand', 'physique', 'musique', 'math', 'svt'];
-let currentSub = '', currentThemeIdx = null, currentStepIdx = 0, myChart = null;
+let currentSub = '', currentThemeIdx = null, currentStepIdx = 0;
 
 // Estas variables se llenan desde la nube
 let db = {};
@@ -38,8 +38,9 @@ database.ref('/').on('value', (snapshot) => {
         autoArchiveReminders();
 
         const adminVisible = document.getElementById('view-admin').classList.contains('active');
-        if (!adminVisible) renderHome();
-        else renderAdminManagement();
+        const homeVisible = document.getElementById('view-home').classList.contains('active');
+        if (adminVisible) renderAdminManagement();
+        else if (homeVisible) renderHome();
     } 
     // CASO B: La nube está vacía (Primera vez), migramos tu trabajo previo
     else {
@@ -305,14 +306,31 @@ function openSubject(m) {
     const container = document.getElementById('folders-container');
     container.innerHTML = '';
     (db[m] || []).forEach((t, i) => {
+        // Calcular progreso
+        const steps = [t.ppt, t.iframe, t.url, t.video, t.pdf, "EXAM"].filter(s => s);
+        const totalSteps = steps.length;
+        const currentProgress = t.progress || 0;
+        const percent = Math.min(Math.round((currentProgress / totalSteps) * 100), 100);
+
         const f = document.createElement('div');
         f.className = 'subject-card card-musique';
-        f.style.height = "120px";
-        f.innerHTML = `<span class="subject-label">📂 ${t.name}</span>`;
+        f.style.height = "160px";
+        f.style.flexDirection = "column";
+        f.style.justifyContent = "center";
+        f.style.alignItems = "center";
+        f.style.gap = "10px";
+        f.style.paddingBottom = "0";
+
+        f.innerHTML = `
+            <span class="subject-label" style="font-size:1rem; padding:5px 15px;">📂 ${t.name}</span>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: ${percent}%"></div>
+                <span class="progress-text">${percent}%</span>
+            </div>
+        `;
         f.onclick = () => openThemePath(i);
         container.appendChild(f);
     });
-    renderChart(m);
 }
 
 function openThemePath(idx) {
@@ -441,16 +459,6 @@ function checkAdminPassword() {
     else alert("Faux!");
 }
 
-function renderChart(m) {
-    const ctx = document.getElementById('progressionChart').getContext('2d');
-    const h = scores[m] || [0];
-    if(myChart) myChart.destroy();
-    myChart = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: h.map((_,i)=>`Ex ${i+1}`), datasets: [{ label: '1-20', data: h, backgroundColor: '#E91E63' }] },
-        options: { scales: { y: { min:0, max:20 } } }
-    });
-}
 
 function autoArchiveReminders() {
     const today = new Date().toISOString().split('T')[0];
