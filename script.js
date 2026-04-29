@@ -69,6 +69,14 @@ function showView(viewId) {
     document.getElementById(viewId).classList.add('active');
 }
 
+function fixGoogleDriveUrl(url) {
+    if (!url) return "";
+    if (url.includes('drive.google.com') && (url.includes('/view') || url.includes('/edit'))) {
+        return url.replace(/\/view.*$/, '/preview').replace(/\/edit.*$/, '/preview');
+    }
+    return url;
+}
+
 function goToHome() { showView('view-home'); renderHome(); }
 function goToSubject() { showView('view-subject'); }
 function goBackToPath() { showView('view-theme-path'); }
@@ -340,7 +348,8 @@ function launchStep(s) {
     const quizPlace = document.getElementById('quiz-place');
     const finishBtn = document.getElementById('btn-finish-activity');
 
-    activityPlace.innerHTML = s.data.includes('<iframe') ? s.data : `<iframe src="${s.data}"></iframe>`;
+    const finalUrl = fixGoogleDriveUrl(s.data);
+    activityPlace.innerHTML = finalUrl.includes('<iframe') ? finalUrl : `<iframe src="${finalUrl}"></iframe>`;
 
     if (s.type === "pdf-quiz") {
         quizPlace.classList.remove('hidden');
@@ -422,7 +431,6 @@ function saveStepScore() {
 }
 
 function showLogin() {
-    console.log("Showing login...");
     showView('view-login');
 }
 function checkAdminPassword() {
