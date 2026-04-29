@@ -133,6 +133,8 @@ function saveTheme() {
         document.getElementById('adm-iframe').value = '';
         document.getElementById('adm-url').value = '';
         document.getElementById('adm-video').value = '';
+        document.getElementById('adm-pdf').value = '';
+        document.getElementById('adm-answers').value = '';
         renderAdminManagement();
         setTimeout(() => { status.innerText = ""; }, 2000);
     });
