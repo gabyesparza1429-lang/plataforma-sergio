@@ -14,7 +14,7 @@ firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
 const materias = ['histoire', 'francais', 'espagnol', 'anglais', 'allemand', 'physique', 'musique', 'math', 'svt'];
-let currentSub = '', currentThemeIdx = null, currentStepIdx = 0;
+let currentSub = '', currentThemeIdx = null, currentStepIdx = 0, currentStepName = '';
 
 // Estas variables se llenan desde la nube
 let db = {};
@@ -357,7 +357,11 @@ function openThemePath(idx) {
         b.className = `subject-card card-musique ${locked ? 'locked' : ''}`;
         b.style.height = "120px";
         b.innerHTML = `<span class="subject-label">${s.icon} ${s.name}</span>`;
-        if(!locked) b.onclick = () => { currentStepIdx = i; launchStep(s); };
+        if(!locked) b.onclick = () => {
+            currentStepIdx = i;
+            currentStepName = s.name; // Guardamos el nombre para saber si es Actividad/Examen
+            launchStep(s);
+        };
         container.appendChild(b);
     });
 }
@@ -368,8 +372,17 @@ function launchStep(s) {
     const quizPlace = document.getElementById('quiz-place');
     const finishBtn = document.getElementById('btn-finish-activity');
 
-    const finalUrl = fixGoogleDriveUrl(s.data);
-    activityPlace.innerHTML = finalUrl.includes('<iframe') ? finalUrl : `<iframe src="${finalUrl}"></iframe>`;
+    if (s.data === "EXAM") {
+        activityPlace.innerHTML = `
+            <div class="admin-card" style="margin-top:50px; text-align:center;">
+                <h2>🎓 Examen Final</h2>
+                <p>C'est l'heure de montrer ce que tu as appris !</p>
+                <p>N'oublie pas de demander à Gaby de valider ta note.</p>
+            </div>`;
+    } else {
+        const finalUrl = fixGoogleDriveUrl(s.data);
+        activityPlace.innerHTML = finalUrl.includes('<iframe') ? finalUrl : `<iframe src="${finalUrl}"></iframe>`;
+    }
 
     if (s.type === "pdf-quiz") {
         quizPlace.classList.remove('hidden');
@@ -436,8 +449,15 @@ function gradeQuiz() {
 
 function completeStep() {
     const theme = db[currentSub][currentThemeIdx];
-    if(currentStepIdx === 1) document.getElementById('modal-score').classList.remove('hidden');
-    else { theme.progress = (theme.progress || 0) + 1; database.ref('/').set({ db, scores, reminders, archivedReminders }); }
+    // Actividad es el paso que requiere nota (usualmente el segundo paso)
+    if(currentStepName === "Actividad" || currentStepName === "Examen") {
+        document.getElementById('modal-score').classList.remove('hidden');
+    } else {
+        theme.progress = (theme.progress || 0) + 1;
+        database.ref('/').set({ db, scores, reminders, archivedReminders }).then(() => {
+            openThemePath(currentThemeIdx);
+        });
+    }
 }
 
 function saveStepScore() {
